@@ -15,18 +15,18 @@ Simply open a profile URL (like `hackmate.dev/hippyaki`), and the system automat
 
 ## Features
 
-✅ **Username-Based Discovery** – Enter or visit a URL with a Commudle username (e.g. `/hippyaki`) to auto-fetch data.
-✅ **Commudle API Integration** – Pulls user profile details from:
+* **Username-Based Discovery** – Enter or visit a URL with a Commudle username (e.g. `/hippyaki`) to auto-fetch data.
+* **Commudle API Integration** – Pulls user profile details from:
 `https://json.commudle.com/api/v2/users?username=<username>`
-✅ **Smart Data Extraction** – Extracts tags, name, bio, and interests for matchmaking.
-✅ **Tinder-Style Swipe UI** – Intuitive swipe interface to like or skip profiles.
-✅ **Custom Backend Sync** – Sends fetched user data to your backend via **POST** for:
+* **Smart Data Extraction** – Extracts tags, name, bio, and interests for matchmaking.
+* **Tinder-Style Swipe UI** – Intuitive swipe interface to like or skip profiles.
+* **Custom Backend Sync** – Sends fetched user data to your backend via **POST** for:
 
 * Match analytics
 * Queue management
 * Activity logging
-  ✅ **Mobile-Responsive Design** – Works flawlessly on all devices for hackathon demos.
-  ✅ **Hackathon-Ready Setup** – Plug-and-play for live showcases!
+  - **Mobile-Responsive Design** – Works flawlessly on all devices for hackathon demos.
+  - **Hackathon-Ready Setup** – Plug-and-play for live showcases!
 
 ---
 

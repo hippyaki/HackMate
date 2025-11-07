@@ -21,12 +21,11 @@ Simply open a profile URL (like `hackmate.dev/hippyaki`), and the system automat
 * **Smart Data Extraction** – Extracts tags, name, bio, and interests for matchmaking.
 * **Tinder-Style Swipe UI** – Intuitive swipe interface to like or skip profiles.
 * **Custom Backend Sync** – Sends fetched user data to your backend via **POST** for:
-
-* Match analytics
-* Queue management
-* Activity logging
-  - **Mobile-Responsive Design** – Works flawlessly on all devices for hackathon demos.
-  - **Hackathon-Ready Setup** – Plug-and-play for live showcases!
+    - Match analytics
+    - Queue management
+    - Activity logging
+ * **Mobile-Responsive Design** – Works flawlessly on all devices for hackathon demos.
+ * **Hackathon-Ready Setup** – Plug-and-play for live showcases!
 
 ---
 

@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/all", getAllUsers);
 router.get("/", getUserByUid);
-router.get("/validate", checkUsername);
+router.get("/check", checkUsername);
 router.post("/", addUser);
 
 module.exports = router;

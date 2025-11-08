@@ -57,7 +57,7 @@ const addUser = async (req, res) => {
 // GET check if username exists
 const checkUsername = async (req, res) => {
   try {
-    const { username } = req.body;
+    const { username } = req.params;
 
     const snapshot = await db.collection("users").where("username", "==", username).get();
 

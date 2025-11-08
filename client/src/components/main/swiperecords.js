@@ -4,15 +4,53 @@ import { motion } from "framer-motion";
 import { User, Heart, Users, UserCircle } from "lucide-react";
 import Button from "../ui/button";
 import { Card } from "../ui/card";
+import AuthService from '../../services/authService';
 
 export default function SwipeRecords() {
   const [username, setUsername] = useState("");
-  const [showPopup, setShowPopup] = useState(true);
-  // const [userData, setUserData] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [userData, setUser] = useState(null);
   const [matches, setMatches] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");
   const rocketContainerRef = useRef(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUser();
+  }, []);
+
+
+  const handleLogout = async () => {
+    try {
+        const result = await AuthService.logout();
+  
+        if (result.success) {
+          setSuccess(true);
+          console.log('User Logged Out', result.user);
+          navigate('/login');
+          // Navigate or notify the user to verify their email
+        } else {
+          setError(result.error.message);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred.');
+      } finally {
+        setIsLoading(false);
+      }
+  };
 
   const dummyProfiles = [
     {
@@ -40,10 +78,11 @@ export default function SwipeRecords() {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
-        setUserData(json.data);
-        matchProfiles(json.data.tags.map((t) => t.name.toLowerCase()));
+        setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
+        const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
+        matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
-      } else {
+      } else {``
         alert("User not found. Try again!");
       }
     } catch (e) {
@@ -51,28 +90,66 @@ export default function SwipeRecords() {
     }
   };
 
-  const setUserData = async (userData) => {
+ const checkUsername = async () => {
     try {
-      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uid=${userData.uid}`);
       const json = await res.json();
-      if (json.status === 200 && json.data) {
-       console.log("Updated", json.data);
+
+      if (res.status === 200) {
+        const username = json.username;
+
+        if (!username || username.trim() === "") {
+          setShowPopup(true); // Show popup to enter Commudle username
+        } else {
+          const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+          const json = await res.json();
+          if (json.status === 200 && json.data) {
+            setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
+            const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
+            matchProfiles(userTags); // Start Swiping
+            setShowPopup(false);
+          } else {
+            alert("User not found. Try again!");
+          }
+        }
       } else {
         alert("User not found. Try again!");
       }
     } catch (e) {
       alert("Error fetching Commudle data.");
+      console.error(e);
+    }
+  };
+  checkUsername();
+
+
+
+  const matchProfiles = async (userTags) => {
+    try {
+      // Make API request
+      const res = await fetch("http://localhost:5000/api/hackers/match", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tags: userTags }), // send tags in body
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch matched profiles");
+      }
+
+      const data = await res.json();
+      // Optionally, you can sort by matchScore if API doesn't already sort
+      const sorted = data.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+
+      // Set recommended users
+      setRecommended(sorted);
+    } catch (error) {
+      console.error("Error matching profiles:", error);
     }
   };
 
-  const matchProfiles = (userTags) => {
-    const scored = dummyProfiles.map((p) => {
-      const score = p.tags.filter((tag) => userTags.includes(tag.toLowerCase())).length;
-      return { ...p, score };
-    });
-    const sorted = scored.sort((a, b) => b.score - a.score);
-    setRecommended(sorted);
-  };
 
   const handleSwipe = (likedProfile) => {
     setMatches((prev) => [...prev, likedProfile]);
@@ -162,13 +239,9 @@ export default function SwipeRecords() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
-                <img
-                  src={recommended[0].img}
-                  alt={recommended[0].name}
-                  className="rounded-2xl w-full h-64 object-cover mb-4 border border-white/20"
-                />
+              
                 <h2 className="text-xl font-semibold">{recommended[0].name}</h2>
-                <p className="text-gray-300 text-sm mb-3">{recommended[0].about}</p>
+                <p className="text-gray-300 text-sm mb-3">{recommended[0].bio}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recommended[0].tags.map((tag) => (
                     <span

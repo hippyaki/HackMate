@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get("/all", getAllUsers);
 router.get("/", getUserByUid);
-router.get("/check/:uid", checkUID);
+router.get("/check", checkUID);
 router.post("/", addUser);
-router.put("/:uid", updateUser);
+router.put("/", updateUser);
 
 module.exports = router;

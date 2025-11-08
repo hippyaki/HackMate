@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
 // GET single user by UID
 const getUserByUid = async (req, res) => {
   try {
-    const { uid } = req.body;
+    const { uid } = req.params;
     const userSnap = await db.collection("users").doc(uid).get();
 
     if (!userSnap.exists) {
@@ -65,12 +65,17 @@ const checkUID = async (req, res) => {
       return res.status(200).json({ exists: false });
     }
 
-    res.status(200).json({ exists: true });
+    // Assuming uid is unique, we take the first document
+    const userDoc = snapshot.docs[0].data();
+    const username = userDoc.username; // get the username field
+
+    res.status(200).json({ exists: true, username });
   } catch (error) {
     console.error("Error checking uid:", error);
     res.status(500).json({ error: "Error checking uid" });
   }
 };
+
 
 // PUT update hacker
 const updateUser = async (req, res) => {

@@ -18,7 +18,7 @@ import {
 import SwipeRecords from './swiperecords';
 import AuthService from '../../services/authService';
 
-const SwipeBoard = () => {
+const swipe = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState('SwipeRecords');
   const [user, setUser] = useState(null);
@@ -97,7 +97,7 @@ const SwipeBoard = () => {
       >
         <div className="p-4 flex items-center justify-between">
           <h2 className={`font-bold ${!isSidebarOpen ? 'hidden' : ''}`}>
-            Hack SwipeBoard
+            Hack swipe
           </h2>
           <Button 
             variant="ghost" 
@@ -168,4 +168,4 @@ const SwipeBoard = () => {
   );
 };
 
-export default SwipeBoard;
+export default SwipeRecords;

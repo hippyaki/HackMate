@@ -7,8 +7,8 @@ import LoginPage from "./components/authentication/LoginPage";
 import SignUpPage from "./components/authentication/SignUpPage";
 import ForgotPasswordPage from "./components/authentication/ForgotPasswordPage";
 
-// SwipeBoard
-import SwipeBoard from "./components/main/swiperecords";
+// SwipeRecords
+import SwipeRecords from "./components/main/swiperecords";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -32,13 +32,13 @@ const App = () => {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           
-          {/* SwipeBoard Route - Protected */}
+          {/* SwipeRecords Route - Protected */}
           <Route 
-            path="/SwipeBoard" 
+            path="/swipe" 
             element={
               <ProtectedRoute>
                 
-                <SwipeBoard />
+                <SwipeRecords />
               </ProtectedRoute>
             } 
           />

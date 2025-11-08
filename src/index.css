@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* 
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,4 +9,75 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+} */
+
+body {
+  background-color: #121212;
+  color: #fff;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
 }
+
+.rocket-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.rocket {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/e/e3/Rocket_icon.svg') no-repeat center;
+  background-size: contain;
+  opacity: 0.8;
+  animation: rocketMove linear infinite;
+}
+
+@keyframes rocketMove {
+  from {
+    transform: translate(-100px, 100vh) rotate(-45deg);
+  }
+  to {
+    transform: translate(100vw, -100px) rotate(-45deg);
+  }
+}
+
+.main-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 20vh;
+}
+
+input {
+  background-color: #222;
+  border: 1px solid #ff9800;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.card {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  margin: 10px auto;
+  width: 300px;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+}
+
+@font-face {
+  font-family: 'HackMateFont';
+  src: url('./assets/fonts/FirebreakDemoRegular.ttf') format('truetype');
+  font-weight: bolder;
+  font-style: normal;
+}
+

@@ -5,6 +5,7 @@ import { User, Heart, Users, UserCircle } from "lucide-react";
 import Button from "../ui/button";
 import { Card } from "../ui/card";
 import AuthService from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export default function SwipeRecords() {
   const [username, setUsername] = useState("");
@@ -14,6 +15,10 @@ export default function SwipeRecords() {
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");
   const rocketContainerRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -40,7 +45,7 @@ export default function SwipeRecords() {
         if (result.success) {
           setSuccess(true);
           console.log('User Logged Out', result.user);
-          navigate('/login');
+          navigate('/');
           // Navigate or notify the user to verify their email
         } else {
           setError(result.error.message);
@@ -52,33 +57,12 @@ export default function SwipeRecords() {
       }
   };
 
-  const dummyProfiles = [
-    {
-      name: "Aditi Sharma",
-      about: "Frontend dev & UI enthusiast 🌈",
-      tags: ["web development", "ui design", "javascript"],
-      img: "https://randomuser.me/api/portraits/women/81.jpg",
-    },
-    {
-      name: "Rohit Singh",
-      about: "Linux nerd + backend pro 🧠",
-      tags: ["linux", "problem solving", "python"],
-      img: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      name: "Priya Patel",
-      about: "Exploring network security and IoT 🔒",
-      tags: ["iot", "network security", "cloud computing"],
-      img: "https://randomuser.me/api/portraits/women/55.jpg",
-    },
-  ];
-
   const fetchProfile = async () => {
     try {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
-        setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
+        //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
         const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
@@ -104,7 +88,7 @@ export default function SwipeRecords() {
           const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
           const json = await res.json();
           if (json.status === 200 && json.data) {
-            setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
+            //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
             const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
             matchProfiles(userTags); // Start Swiping
             setShowPopup(false);

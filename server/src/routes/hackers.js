@@ -5,7 +5,7 @@ const {
   createHacker,
   updateHacker,
   deleteHacker
-} = require("../controllers/hackersController");
+} = require("../controllers/hackerController");
 
 const router = express.Router();
 

@@ -46,19 +46,38 @@ const LoginPage = ({ switchToSignUp }) => {
       // Successful Google login - handle navigation or state update
       console.log('Google logged in user:', result.user);
       
-      // // call your backend to create user doc if needed
-      // await fetch('/api/createUser', {
-      //   method: 'POST',
-      //   headers: {'Content-Type':'application/json'},
-      //   body: JSON.stringify({
-      //     uid: result.user.uid, name: result.user.displayName, username: result.user.displayName?.replace(/\s+/g,'').toLowerCase(),
-      //     email: result.user.email, photoURL: result.user.photoURL
-      //   })
-      // });
+      const username = result.user.displayName?.replace(/\s+/g, '').toLowerCase();
 
-      // Example: Navigate to SwipeRecords or update app state
-      navigate('/swipe');
-      // console.log(await AuthService.getCurrentUser);
+      try {
+        // 1️⃣ Check if username exists
+        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${username}`);
+        const checkData = await checkResponse.json();
+
+        if (!checkData.exists) {
+          // 2️⃣ Username does not exist → create new user
+          const createResponse = await fetch('https://hackmate-rv8q.onrender.com/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              uid: result.user.uid,
+              name: result.user.displayName,
+              username: username,
+              email: result.user.email,
+              photoURL: result.user.photoURL
+            })
+          });
+
+          const createData = await createResponse.json();
+          console.log('User created:', createData);
+        } else {
+          console.log('Username already exists, skipping creation');
+        }
+        // Navigate or update state after login
+        navigate('/swipe');
+      } catch (err) {
+        console.error('Error checking/creating user:', err);
+        setError('Failed to verify user.');
+      }
     } else {
       // Login failed
       setError(result.error.message);

@@ -1,11 +1,26 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+const admin = require("firebase-admin");
+require("dotenv").config(); // loads .env
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_AREACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_AREACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_AREACT_APP_FIREBASE_PROJECT_ID
-};
+// Ensure private key contains real newlines
+const privateKey = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
-const appFB = initializeApp(firebaseConfig);
-export const db = getFirestore(appFB);
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      type: process.env.FIREBASE_TYPE,
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: privateKey,
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: process.env.FIREBASE_AUTH_URI,
+      token_uri: process.env.FIREBASE_TOKEN_URI,
+      auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+      client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
+    }),
+  });
+}
+
+const db = admin.firestore();
+
+module.exports = { db };

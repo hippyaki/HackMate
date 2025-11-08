@@ -1,9 +1,9 @@
-import express from "express";
-import cors from "cors";
-import userRoutes from "./routes/users.js";
-import hackerRoutes from "./routes/hackers.js";
-
+const userRoutes = require('./src/routes/users');
+const hackerRoutes = require('./src/routes/hackers');
+const express = require("express");
 const app = express();
+
+
 app.use(cors());
 app.use(express.json());
 

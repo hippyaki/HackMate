@@ -1,0 +1,116 @@
+const {
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where
+} = require("firebase/firestore");
+const { db } = require("../services/firestore.js");
+
+// GET all hackers
+const getAllHackers = async (req, res) => {
+  try {
+    const snapshot = await getDocs(collection(db, "hackers"));
+    const hackers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(hackers);
+  } catch (error) {
+    console.error("Error fetching hackers:", error);
+    res.status(500).json({ message: "Failed to fetch hackers" });
+  }
+};
+
+// GET hacker by UID
+const getHackerById = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const docRef = doc(db, "hackers", uid);
+    const hackerSnap = await getDoc(docRef);
+
+    if (!hackerSnap.exists()) {
+      return res.status(404).json({ message: "Hacker not found" });
+    }
+
+    res.status(200).json({ id: hackerSnap.id, ...hackerSnap.data() });
+  } catch (error) {
+    console.error("Error fetching hacker:", error);
+    res.status(500).json({ message: "Failed to fetch hacker" });
+  }
+};
+
+// POST new hacker
+const createHacker = async (req, res) => {
+  try {
+    const { uid, username, name, bio, tags = [] } = req.body;
+
+    if (!uid || !username) {
+      return res.status(400).json({ message: "uid and username are required" });
+    }
+
+    // Ensure username is unique
+    const q = query(collection(db, "hackers"), where("username", "==", username));
+    const existing = await getDocs(q);
+    if (!existing.empty) {
+      return res.status(409).json({ message: "Username already taken" });
+    }
+
+    await setDoc(doc(db, "hackers", uid), {
+      uid,
+      username,
+      name: name || "",
+      bio: bio || "",
+      tags,
+      subscribersCount: 0,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    res.status(201).json({ message: "Hacker created successfully", uid });
+  } catch (error) {
+    console.error("Error creating hacker:", error);
+    res.status(500).json({ message: "Failed to create hacker" });
+  }
+};
+
+// PUT update hacker
+const updateHacker = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const updates = req.body;
+    updates.updatedAt = Date.now();
+
+    const hackerRef = doc(db, "hackers", uid);
+    await updateDoc(hackerRef, updates);
+
+    res.status(200).json({ message: "Hacker updated successfully" });
+  } catch (error) {
+    console.error("Error updating hacker:", error);
+    res.status(500).json({ message: "Failed to update hacker" });
+  }
+};
+
+// DELETE hacker
+const deleteHacker = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const hackerRef = doc(db, "hackers", uid);
+    await deleteDoc(hackerRef);
+
+    res.status(200).json({ message: "Hacker deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting hacker:", error);
+    res.status(500).json({ message: "Failed to delete hacker" });
+  }
+};
+
+module.exports = {
+  getAllHackers,
+  getHackerById,
+  createHacker,
+  updateHacker,
+  deleteHacker
+};

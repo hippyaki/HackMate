@@ -8,7 +8,7 @@ import SignUpPage from "./components/authentication/SignUpPage";
 import ForgotPasswordPage from "./components/authentication/ForgotPasswordPage";
 
 // SwipeBoard
-import SwipeBoard from "./components/main/SwipeBoard";
+import SwipeBoard from "./components/main/swiperecords";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

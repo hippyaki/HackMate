@@ -1,11 +1,11 @@
 import React from 'react';
 import AuthService from '../../services/authService';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const onSignIn = async () => {
-    const result = await AuthService.signInWithGooglePopup();
+    const result = await AuthService.signInWithGoogle();
     const user = result.user;
     // call your backend to create user doc if needed
     await fetch('/api/createUser', {
@@ -16,7 +16,7 @@ export default function Login() {
         email: user.email, photoURL: user.photoURL
       })
     });
-    router.push('/');
+    navigate('/');
   };
 
   return (

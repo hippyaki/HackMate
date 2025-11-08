@@ -66,7 +66,7 @@ export default function SwipeRecords() {
         const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
-      } else {``
+      } else {
         alert("User not found. Try again!");
       }
     } catch (e) {

@@ -55,11 +55,11 @@ const addUser = async (req, res) => {
 };
 
 // GET check if username exists
-const checkUsername = async (req, res) => {
+const checkUID = async (req, res) => {
   try {
-    const { username } = req.params;
+    const { uid } = req.params;
 
-    const snapshot = await db.collection("users").where("username", "==", username).get();
+    const snapshot = await db.collection("users").where("uid", "==", uid).get();
 
     if (snapshot.empty) {
       return res.status(200).json({ exists: false });
@@ -67,8 +67,23 @@ const checkUsername = async (req, res) => {
 
     res.status(200).json({ exists: true });
   } catch (error) {
-    console.error("Error checking username:", error);
-    res.status(500).json({ error: "Error checking username" });
+    console.error("Error checking uid:", error);
+    res.status(500).json({ error: "Error checking uid" });
+  }
+};
+
+// PUT update hacker
+const updateUser = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const updates = { ...req.body, updatedAt: Date.now() };
+
+    await db.collection("users").doc(uid).update(updates);
+
+    res.status(200).json({ message: "Hacker updated successfully" });
+  } catch (error) {
+    console.error("Error updating hacker:", error);
+    res.status(500).json({ message: "Failed to update hacker" });
   }
 };
 
@@ -76,5 +91,6 @@ module.exports = {
   getAllUsers,
   getUserByUid,
   addUser,
-  checkUsername,
+  checkUID,
+  updateUser
 };

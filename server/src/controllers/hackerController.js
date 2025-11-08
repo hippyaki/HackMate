@@ -32,7 +32,18 @@ const getHackerById = async (req, res) => {
 // POST new hacker
 const createHacker = async (req, res) => {
   try {
-    const { uid, username, name, bio, tags = [] } = req.body;
+    const {
+      uid,
+      username,
+      name,
+      bio = "",
+      tags = [],
+      location = {},
+      scoreVector = {},
+      subscribedTo = [],
+      postsTokenId = "",
+      visibility = "public",
+    } = req.body;
 
     if (!uid || !username) {
       return res.status(400).json({ message: "uid and username are required" });
@@ -48,9 +59,14 @@ const createHacker = async (req, res) => {
       uid,
       username,
       name: name || "",
-      bio: bio || "",
+      bio,
       tags,
+      location,
+      scoreVector,
+      subscribedTo,
       subscribersCount: 0,
+      postsTokenId,
+      visibility,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

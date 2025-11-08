@@ -45,23 +45,21 @@ const LoginPage = ({ switchToSignUp }) => {
     if (result.success) {
       // Successful Google login - handle navigation or state update
       console.log('Google logged in user:', result.user);
-      
-      const username = result.user.displayName?.replace(/\s+/g, '').toLowerCase();
 
       try {
-        // 1️⃣ Check if username exists
-        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${username}`);
+        // 1️⃣ Check if uid exists
+        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${result.user.uid}`);
         const checkData = await checkResponse.json();
 
         if (!checkData.exists) {
-          // 2️⃣ Username does not exist → create new user
+          // 2️⃣ UID does not exist → create new user
           const createResponse = await fetch('https://hackmate-rv8q.onrender.com/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               uid: result.user.uid,
               name: result.user.displayName,
-              username: username,
+              username: "",
               email: result.user.email,
               photoURL: result.user.photoURL
             })

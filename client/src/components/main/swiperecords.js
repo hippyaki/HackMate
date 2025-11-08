@@ -8,7 +8,7 @@ import { Card } from "../ui/card";
 export default function SwipeRecords() {
   const [username, setUsername] = useState("");
   const [showPopup, setShowPopup] = useState(true);
-  const [userData, setUserData] = useState(null);
+  // const [userData, setUserData] = useState(null);
   const [matches, setMatches] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");
@@ -43,6 +43,20 @@ export default function SwipeRecords() {
         setUserData(json.data);
         matchProfiles(json.data.tags.map((t) => t.name.toLowerCase()));
         setShowPopup(false);
+      } else {
+        alert("User not found. Try again!");
+      }
+    } catch (e) {
+      alert("Error fetching Commudle data.");
+    }
+  };
+
+  const setUserData = async (userData) => {
+    try {
+      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+      const json = await res.json();
+      if (json.status === 200 && json.data) {
+       console.log("Updated", json.data);
       } else {
         alert("User not found. Try again!");
       }

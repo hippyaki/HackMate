@@ -116,7 +116,7 @@ export default function SwipeRecords() {
       {/* Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-          <Card className="p-6 w-80 backdrop-blur-lg bg-white/5 rounded-2xl border border-[#333]">
+          <Card className="p-6 w-80 backdrop-blur-lg bg-white/2 rounded-2xl border border-[#333]">
             <h2 className="text-lg font-semibold mb-3 text-center text-gray-100">
               Enter Commudle Username
             </h2>
@@ -144,7 +144,7 @@ export default function SwipeRecords() {
               
               <motion.div
                 key={recommended[0].name}
-                className="relative w-80 rounded-3xl shadow-xl p-4 backdrop-blur-lg bg-white/5 border border-white/20"
+                className="relative w-80 rounded-3xl shadow-xl p-4 backdrop-blur-lg bg-white/2 border border-white/20"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
@@ -193,7 +193,7 @@ export default function SwipeRecords() {
             <p className="text-gray-500 text-sm">No matches yet 😅</p>
           ) : (
             matches.map((m) => (
-              <Card key={m.name} className="p-3 mb-3 flex gap-3 items-center bg-white/5 backdrop-blur-md border border-white/20">
+              <Card key={m.name} className="p-3 mb-3 flex gap-3 items-center bg-white/2 backdrop-blur-md border border-white/20">
                 <img src={m.img} alt={m.name} className="w-12 h-12 rounded-full" />
                 <div>
                   <h3 className="font-semibold text-gray-100">{m.name}</h3>

@@ -12,25 +12,37 @@ const allowedOrigins = [
   "localhost",
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+app.use(express.json());
 
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
+app.use((req, res, next) => {
+  const origin = req.get("origin"); // undefined if header not present
+  const secFetchMode = req.get("sec-fetch-mode"); // may be undefined for older browsers/clients
+
+  if (!origin && secFetchMode === "navigate") {
+    return res.status(401).send("Unauthorized");
   }
 
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  
-  // Handle preflight requests
+  if (origin) {
+    if (!allowedOrigins.includes(origin)) {
+      return res.status(401).send("Unauthorized");
+    }
+
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  } else {
+  }
+
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
 
   next();
 });
 
-app.use(express.json());
 
 
 // routes

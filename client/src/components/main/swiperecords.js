@@ -45,7 +45,7 @@ export default function SwipeRecords() {
                   setUserInfo({
                     username: username,
                     bio: json2.about_me || "No bio available",
-                    tags: json2.tags?.map((tag) => tag.name) || [],
+                    tags: json2.tags || [],
                     subscribedTo: json2.subscribedTo || []
                   });
                   const userTags = json2.tags.map(tag => tag.name.toLowerCase());

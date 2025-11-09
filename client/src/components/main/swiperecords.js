@@ -28,7 +28,7 @@ export default function SwipeRecords() {
           console.log('Current User:', currentUser);
           setUser(currentUser);
           try {
-            const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${currentUser}`);
+            const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${currentUser.uid}`);
             const json = await res.json();
 
             if (res.status === 200) {
@@ -46,18 +46,22 @@ export default function SwipeRecords() {
                   setShowPopup(false);
                 } else {
                   console.log("User not found. Try again!");
+                  setShowPopup(true);
                 }
               }
             } else {
               console.log("User not found. Try again!");
+              setShowPopup(true);
             }
           } catch (e) {
             console.log("Something went wrong");
             console.error(e);
+            setShowPopup(true);
           }
         }
       } catch (error) {
         console.error('Error fetching user:', error);
+        setShowPopup(true);
       } finally {
         setIsLoading(false);
       }
@@ -86,9 +90,9 @@ export default function SwipeRecords() {
       }
   };
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (uname) => {
     try {
-      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
         //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
@@ -192,12 +196,12 @@ export default function SwipeRecords() {
             </h2>
             <input
               type="text"
-              value={username}
+              value={uname}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. gdg-noida"
               className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
             />
-            <Button className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" onClick={fetchProfile}>
+            <Button className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" onClick={fetchProfile(uname)}>
               Continue
             </Button>
           </Card>

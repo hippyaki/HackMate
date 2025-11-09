@@ -35,8 +35,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={user ? <Navigate to="/swipe" /> : <LoginPage />} />
-        <Route path="/swipe" element={user ? <Navigate to="/swipe" /> : <LoginPage />} />
+        <Route path="/" element={user ? <SwipeRecords /> : <LoginPage />} />
+        <Route path="/swipe" element={user ? <SwipeRecords /> : <LoginPage />} />
       </Routes>
     </Router>
   );

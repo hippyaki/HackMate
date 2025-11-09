@@ -41,7 +41,7 @@ export default function SwipeRecords() {
               } else {
                 const res = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
                 const json = await res.json();
-                if (json.status === 200 && json.data) {
+                if (res.status === 200) {
                   setUserInfo({
                     username: username,
                     bio: json.data.about_me || "No bio available",

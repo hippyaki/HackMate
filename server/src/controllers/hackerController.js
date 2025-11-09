@@ -12,11 +12,11 @@ const getAllHackers = async (req, res) => {
   }
 };
 
-// GET hacker by UID
+// GET hacker by Username
 const getHackerById = async (req, res) => {
   try {
-    const { uid } = req.query;
-    const hackerSnap = await db.collection("hackers").where("uid", "==", uid).get();
+    const { username } = req.query;
+    const hackerSnap = await db.collection("hackers").where("username", "==", username).get();
 
     if (!hackerSnap.exists) {
       return res.status(404).json({ message: "Hacker not found" });
@@ -174,11 +174,58 @@ const getHackerMatches = async (req, res) => {
   }
 };
 
+
+// POST /hackers/subs
+// Request body: { subscribedTo: ["user1", "user2", ...] }
+
+const getHackerSubs = async (req, res) => {
+  try {
+    const { subscribedTo } = req.body;
+
+    if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
+      return res.status(400).json({ message: "subscribedTo array is required in request body" });
+    }
+
+    // Firestore only allows up to 10 items in 'in' query at once
+    const chunks = [];
+    for (let i = 0; i < subscribedTo.length; i += 10) {
+      chunks.push(subscribedTo.slice(i, i + 10));
+    }
+
+    let allHackers = [];
+
+    for (const chunk of chunks) {
+      const snapshot = await db
+        .collection("hackers")
+        .where("username", "in", chunk)
+        .get();
+
+      const hackers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      allHackers = [...allHackers, ...hackers];
+    }
+
+    if (allHackers.length === 0) {
+      return res.status(404).json({ message: "No hackers found for the given usernames." });
+    }
+
+    res.status(200).json(allHackers);
+  } catch (error) {
+    console.error("Error fetching subscribed hackers:", error);
+    res.status(500).json({ message: "Failed to fetch subscribed hackers" });
+  }
+};
+
+
 module.exports = {
   getAllHackers,
   getHackerById,
   createHacker,
   updateHacker,
   deleteHacker,
-  getHackerMatches
+  getHackerMatches,
+  getHackerSubs
 };

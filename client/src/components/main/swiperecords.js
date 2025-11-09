@@ -34,6 +34,7 @@ export default function SwipeRecords() {
 
             if (res.status === 200) {
               const username = json.username;
+              const subs = json.subscribedTo;
 
               if (!username || username.trim() === "") {
                 setShowPopup(true); // Show popup to enter Commudle username
@@ -44,9 +45,11 @@ export default function SwipeRecords() {
                   setUserInfo({
                     username: username,
                     bio: json.data.about_me || "No bio available",
-                    tags: json.data.tags?.map((tag) => tag.name) || []
+                    tags: json.data.tags?.map((tag) => tag.name) || [],
+                    subscribedTo: subs
                   });
                   const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
+                  setPreMatches(subs); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
                   setUserData(username, currentUser);
@@ -75,37 +78,6 @@ export default function SwipeRecords() {
 
     checkUser();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchCommudleData = async () => {
-  //     if (!userInfo?.username || userInfo.username.trim() === "") {
-  //       setError("Username not found. Please update your Commudle username.");
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await fetch(
-  //         `https://json.commudle.com/api/v2/users?username=${userData.username}`
-  //       );
-  //       const json = await res.json();
-
-  //       if (res.ok && json.status === 200 && json.data) {
-  //         setUserInfo({
-  //           username: userData.username,
-  //           bio: json.data.about_me || "No bio available",
-  //           tags: json.data.tags?.map((tag) => tag.name) || []
-  //         });
-  //       } else {
-  //         setError("Commudle user not found.");
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //       setError("Failed to fetch Commudle data.");
-  //     }
-  //   };
-
-  //   fetchCommudleData();
-  // }, [userData?.username]);
 
   const setUserData = async (username, currentUser) => {
     try {
@@ -197,6 +169,26 @@ export default function SwipeRecords() {
     }
   };
 
+
+  const setPreMatches = async (subs) => {
+    try {
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/subs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ subscribedTo: subs }), // send username in body
+      });
+      if (!res.ok) {
+        throw new Error("Failed to fetch subscribed profiles");
+      }
+      const data = await res.json();
+      setMatches(data);
+      // setMatches((prev) => [...prev, sub]);
+    } catch (error) {
+      console.error("Error fetching subscribed profiles:", error);
+    }
+  };
 
 
   const handleLogout = async () => {

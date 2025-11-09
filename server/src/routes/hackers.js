@@ -5,14 +5,16 @@ const {
   createHacker,
   updateHacker,
   deleteHacker,
-  getHackerMatches
+  getHackerMatches,
+  getHackerSubs
 } = require("../controllers/hackerController");
 
 const router = express.Router();
 
 router.get("/all", getAllHackers);
-router.post("/match", getHackerMatches); // specific route first
-router.get("/", getHackerById);     // general route last
+router.post("/match", getHackerMatches); 
+router.post("/subs", getHackerSubs);
+router.get("/", getHackerById);     
 router.post("/", createHacker);
 router.put("/", updateHacker);
 router.delete("/", deleteHacker);

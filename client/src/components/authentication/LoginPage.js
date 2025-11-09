@@ -127,15 +127,15 @@ const LoginPage = ({ switchToSignUp }) => {
           <img
             src="/hackmate-login.png"
             alt="HackMate Logo"
-            className="h-40 w-auto object-contain"
+            className="h-20 w-auto object-contain"
           />
         </div>
-        <div className=" text-6xl text-center">
+        <div className=" text-6xl justify-center text-center">
           <h1 style={{ fontFamily: 'HackMateFont' }}>HackMate</h1>
         </div>
 
-        <h2 className="text-xl text-center font-bold text-[#FF8C00] mb-6 tracking-wide">
-         Get Started!
+        <h2 className="text-xl text-center text-[#FF8C00] mb-6 tracking-wide">
+         Find your Vibe!
         </h2>
 
         {error && (

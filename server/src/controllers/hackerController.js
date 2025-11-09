@@ -12,17 +12,20 @@ const getAllHackers = async (req, res) => {
   }
 };
 
-// GET hacker by UID
+// GET hacker by Username
 const getHackerById = async (req, res) => {
   try {
-    const { uid } = req.query;
-    const hackerSnap = await db.collection("hackers").where("uid", "==", uid).get();
+    const { username } = req.query
+    // const q = await db.collection("hackers").where("username", "==", username.trim()).limit(1).get();
+    const hackerSnap = await db.collection("hackers").where("username", "==", username).get();
+    // console.log("Username query:", username);
+    // console.log("Hacker query result:", hackerSnap);
 
-    if (!hackerSnap.exists) {
+    if (hackerSnap.empty) {
       return res.status(404).json({ message: "Hacker not found" });
     }
-
-    res.status(200).json({ id: hackerSnap.id, ...hackerSnap.data() });
+    const hackers = hackerSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(hackers[0]);
   } catch (error) {
     console.error("Error fetching hacker:", error);
     res.status(500).json({ message: "Failed to fetch hacker" });
@@ -83,17 +86,51 @@ const createHacker = async (req, res) => {
 // PUT update hacker
 const updateHacker = async (req, res) => {
   try {
-    const { uid } = req.body;
+    const { username } = req.body;
+
+    if (!username || username.trim() === "") {
+      return res.status(400).json({ message: "Username is required to find the hacker." });
+    }
+
+    const q = await db.collection("hackers")
+      .where("username", "==", username.trim())
+      .limit(1)
+      .get();
+
+    if (q.empty) {
+      return res.status(404).json({ message: "Hacker with given username not found." });
+    }
+
+    const docRef = db.collection("hackers").doc(q.docs[0].id);
     const updates = { ...req.body, updatedAt: Date.now() };
+    delete updates.username;
 
-    await db.collection("hackers").doc(uid).update(updates);
+    if (Array.isArray(updates.subscribedTo)) {
+      const snap = await docRef.get();
+      const existingData = snap.data();
+      const currentSubscribed = Array.isArray(existingData.subscribedTo)
+        ? existingData.subscribedTo
+        : [];
 
-    res.status(200).json({ message: "Hacker updated successfully" });
+      updates.subscribedTo = Array.from(
+        new Set([...currentSubscribed, ...updates.subscribedTo])
+      );
+    }
+
+    await docRef.update(updates);
+    const updatedSnap = await docRef.get();
+
+    return res.status(200).json({
+      message: "Hacker updated successfully",
+      id: docRef.id,
+      data: updatedSnap.data(),
+    });
   } catch (error) {
     console.error("Error updating hacker:", error);
-    res.status(500).json({ message: "Failed to update hacker" });
+    return res.status(500).json({ message: "Failed to update hacker" });
   }
 };
+
 
 // DELETE hacker
 const deleteHacker = async (req, res) => {
@@ -109,36 +146,101 @@ const deleteHacker = async (req, res) => {
 };
 
 // POST /hackers/match
-// Request body: { tags: ["web development", "dsa problem solving"] }
+// Request body: { username: "gdg-noida", tags: ["web development", "dsa problem solving"] }
 const getHackerMatches = async (req, res) => {
   try {
-    const inputTags = req.body.tags;
+    const { tags: inputTags, username } = req.body;
+
     if (!Array.isArray(inputTags) || inputTags.length === 0) {
       return res.status(400).json({ message: "tags array is required in request body" });
     }
+    if (!username) {
+      return res.status(400).json({ message: "username is required in request body" });
+    }
 
+    // Fetch all hackers (we’ll filter to 50 after scoring)
     const snapshot = await db.collection("hackers").get();
     const hackers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Compute matching score based on common tags
+    // Compute match scores
     const hackersWithScore = hackers.map(hacker => {
       const hackerTags = (hacker.tags || []).map(t => t.name);
       const commonTags = hackerTags.filter(tag => inputTags.includes(tag));
-      return {
-        ...hacker,
-        matchScore: commonTags.length
-      };
+      return { ...hacker, matchScore: commonTags.length };
     });
 
-    // Sort by matchScore descending
-    hackersWithScore.sort((a, b) => b.matchScore - a.matchScore);
+    // Fetch user doc by username
+    const userSnap = await db.collection("hackers").where("username", "==", username).limit(1).get();
 
-    res.status(200).json(hackersWithScore);
+    if (userSnap.empty) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userDoc = userSnap.docs[0];
+    const userData = userDoc.data();
+    const subscribedTo = userData.subscribedTo || [];
+
+    // Filter out hackers that the user is already subscribed to
+    const filteredMatches = hackersWithScore.filter(hacker => !subscribedTo.includes(hacker.username));
+
+    // Sort by match score descending and pick top 50
+    const top50 = filteredMatches
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 50);
+
+    res.status(200).json(top50);
   } catch (error) {
     console.error("Error fetching hacker matches:", error);
     res.status(500).json({ message: "Failed to fetch hacker matches" });
   }
 };
+
+
+
+// POST /hackers/subs
+// Request body: { subscribedTo: ["user1", "user2", ...] }
+
+const getHackerSubs = async (req, res) => {
+  try {
+    const { subscribedTo } = req.body;
+
+    if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
+      return res.status(400).json({ message: "subscribedTo array is required in request body" });
+    }
+
+    // Firestore only allows up to 10 items in 'in' query at once
+    const chunks = [];
+    for (let i = 0; i < subscribedTo.length; i += 10) {
+      chunks.push(subscribedTo.slice(i, i + 10));
+    }
+
+    let allHackers = [];
+
+    for (const chunk of chunks) {
+      const snapshot = await db
+        .collection("hackers")
+        .where("username", "in", chunk)
+        .get();
+
+      const hackers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      allHackers = [...allHackers, ...hackers];
+    }
+
+    if (allHackers.length === 0) {
+      return res.status(404).json({ message: "No hackers found for the given usernames." });
+    }
+
+    res.status(200).json(allHackers);
+  } catch (error) {
+    console.error("Error fetching subscribed hackers:", error);
+    res.status(500).json({ message: "Failed to fetch subscribed hackers" });
+  }
+};
+
 
 module.exports = {
   getAllHackers,
@@ -146,5 +248,6 @@ module.exports = {
   createHacker,
   updateHacker,
   deleteHacker,
-  getHackerMatches
+  getHackerMatches,
+  getHackerSubs
 };

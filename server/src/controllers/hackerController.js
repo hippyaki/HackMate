@@ -15,16 +15,17 @@ const getAllHackers = async (req, res) => {
 // GET hacker by Username
 const getHackerById = async (req, res) => {
   try {
-    const { username } = req.query;
+    const { username } = req.query
+    // const q = await db.collection("hackers").where("username", "==", username.trim()).limit(1).get();
     const hackerSnap = await db.collection("hackers").where("username", "==", username).get();
-    console.log("Username query:", username);
-    console.log("Hacker query result:", hackerSnap);
+    // console.log("Username query:", username);
+    // console.log("Hacker query result:", hackerSnap);
 
-    if (!hackerSnap.exists) {
+    if (hackerSnap.empty) {
       return res.status(404).json({ message: "Hacker not found" });
     }
-
-    res.status(200).json({ id: hackerSnap.id, ...hackerSnap.data() });
+    const hackers = hackerSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(hackers[0]);
   } catch (error) {
     console.error("Error fetching hacker:", error);
     res.status(500).json({ message: "Failed to fetch hacker" });

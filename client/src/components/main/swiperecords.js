@@ -44,12 +44,12 @@ export default function SwipeRecords() {
                 if (res2.status === 200) {
                   setUserInfo({
                     username: username,
-                    bio: json2.data.about_me || "No bio available",
-                    tags: json2.data.tags?.map((tag) => tag.name) || [],
-                    subscribedTo: json2.data.subscribedTo || []
+                    bio: json2.about_me || "No bio available",
+                    tags: json2.tags?.map((tag) => tag.name) || [],
+                    subscribedTo: json2.subscribedTo || []
                   });
-                  const userTags = json2.data.tags.map(tag => tag.name.toLowerCase());
-                  setPreMatches(json2.data.subscribedTo); // Fetch subscribed profiles
+                  const userTags = json2.tags.map(tag => tag.name.toLowerCase());
+                  setPreMatches(json2.subscribedTo); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
                   setUserData(username, currentUser);

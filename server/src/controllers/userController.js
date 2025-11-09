@@ -77,7 +77,7 @@ const checkUID = async (req, res) => {
 };
 
 
-// PUT update hacker
+// PUT update user
 const updateUser = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -85,10 +85,10 @@ const updateUser = async (req, res) => {
 
     await db.collection("users").doc(uid).update(updates);
 
-    res.status(200).json({ message: "Hacker updated successfully" });
+    res.status(200).json({ message: "user updated successfully" });
   } catch (error) {
-    console.error("Error updating hacker:", error);
-    res.status(500).json({ message: "Failed to update hacker" });
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Failed to update user" });
   }
 };
 

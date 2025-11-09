@@ -351,7 +351,7 @@ export default function SwipeRecords() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-[#121212] text-gray-100 pb-16 relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#121212] text-gray-100 pb-16 relative overflow-y-auto">
       {/* Static Rocket Layer */}
       <div ref={rocketContainerRef} className="absolute inset-0 z-0 overflow-hidden"></div>
 

@@ -39,17 +39,17 @@ export default function SwipeRecords() {
               if (!username || username.trim() === "") {
                 setShowPopup(true); // Show popup to enter Commudle username
               } else {
-                const res = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
-                const json = await res.json();
-                if (res.status === 200) {
+                const res2 = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
+                const json2 = await res2.json();
+                if (res2.status === 200) {
                   setUserInfo({
                     username: username,
-                    bio: json.data.about_me || "No bio available",
-                    tags: json.data.tags?.map((tag) => tag.name) || [],
-                    subscribedTo: json.data.subscribedTo || []
+                    bio: json2.data.about_me || "No bio available",
+                    tags: json2.data.tags?.map((tag) => tag.name) || [],
+                    subscribedTo: json2.data.subscribedTo || []
                   });
-                  const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
-                  setPreMatches(json.data.subscribedTo); // Fetch subscribed profiles
+                  const userTags = json2.data.tags.map(tag => tag.name.toLowerCase());
+                  setPreMatches(json2.data.subscribedTo); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
                   setUserData(username, currentUser);

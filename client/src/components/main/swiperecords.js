@@ -41,6 +41,11 @@ export default function SwipeRecords() {
                 const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
                 const json = await res.json();
                 if (json.status === 200 && json.data) {
+                  setUserInfo({
+                    username: username,
+                    bio: json.data.about_me || "No bio available",
+                    tags: json.data.tags?.map((tag) => tag.name) || []
+                  });
                   const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
@@ -71,39 +76,40 @@ export default function SwipeRecords() {
     checkUser();
   }, []);
 
-  useEffect(() => {
-    const fetchCommudleData = async () => {
-      if (!userData.username || userData.username.trim() === "") {
-        setError("Username not found. Please update your Commudle username.");
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchCommudleData = async () => {
+  //     if (!userInfo?.username || userInfo.username.trim() === "") {
+  //       setError("Username not found. Please update your Commudle username.");
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch(
-          `https://json.commudle.com/api/v2/users?username=${userData.username}`
-        );
-        const json = await res.json();
+  //     try {
+  //       const res = await fetch(
+  //         `https://json.commudle.com/api/v2/users?username=${userData.username}`
+  //       );
+  //       const json = await res.json();
 
-        if (res.ok && json.status === 200 && json.data) {
-          setUserInfo({
-            bio: json.data.about_me || "No bio available",
-            tags: json.data.tags?.map((tag) => tag.name) || [],
-          });
-        } else {
-          setError("Commudle user not found.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch Commudle data.");
-      }
-    };
+  //       if (res.ok && json.status === 200 && json.data) {
+  //         setUserInfo({
+  //           username: userData.username,
+  //           bio: json.data.about_me || "No bio available",
+  //           tags: json.data.tags?.map((tag) => tag.name) || []
+  //         });
+  //       } else {
+  //         setError("Commudle user not found.");
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       setError("Failed to fetch Commudle data.");
+  //     }
+  //   };
 
-    fetchCommudleData();
-  }, [userData.username]);
+  //   fetchCommudleData();
+  // }, [userData?.username]);
 
   const setUserData = async (username) => {
     try {
-      if (!userData.uid) {
+      if (!userData?.uid) {
         console.error("User UID not available");
         return;
       }
@@ -152,7 +158,7 @@ export default function SwipeRecords() {
       const payload = {
         uid: String(userData.uid || ""), // ensure string
         username: trimmed,
-        name: (commudleData?.name || userData.displayName || "").trim(),
+        name: (commudleData?.name || userData?.displayName || "").trim(),
         bio: (commudleData?.bio || commudleData?.about_me || "") || "",
         tags: Array.isArray(commudleData?.tags)
           ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
@@ -162,7 +168,7 @@ export default function SwipeRecords() {
         subscribedTo: commudleData?.subscribedTo || [],
         postsTokenId: commudleData?.postsTokenId || "",
         visibility: commudleData?.visibility || "public",
-        photoURL: (commudleData?.photo?.url) || userData.photoURL || "",
+        photoURL: (commudleData?.photo?.url) || userData?.photoURL || "",
       };
 
       try {
@@ -215,6 +221,11 @@ export default function SwipeRecords() {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
+        setUserInfo({
+          username: uname,
+          bio: json.data.about_me || "No bio available",
+          tags: json.data.tags?.map((tag) => tag.name) || []
+        });
         const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
@@ -255,7 +266,7 @@ export default function SwipeRecords() {
 
   const handleSwipe = async (likedProfile) => {
     try {
-      if (!userData.username) {
+      if (!userData?.username) {
         console.error("Current user username not available");
         return;
       }

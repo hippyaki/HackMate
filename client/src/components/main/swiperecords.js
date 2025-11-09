@@ -45,7 +45,7 @@ export default function SwipeRecords() {
                 if (res2.status === 200) {
                   setUserInfo({
                     username: username,
-                    bio: json2.about_me || "No bio available",
+                    bio: json2.bio || "No bio available",
                     tags: json2.tags || [],
                     subscribedTo: json2.subscribedTo || []
                   });

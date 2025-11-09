@@ -228,10 +228,10 @@ export default function SwipeRecords() {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recommended[0].tags.map((tag) => (
                     <span
-                      key={tag}
+                      key={tag.id}
                       className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
                     >
-                      #{tag}
+                      #{tag.name}
                     </span>
                   ))}
                 </div>

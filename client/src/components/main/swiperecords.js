@@ -27,7 +27,34 @@ export default function SwipeRecords() {
         if (currentUser) {
           console.log('Current User:', currentUser);
           setUser(currentUser);
-          console.log('Current User:', userData);
+          try {
+            const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${currentUser}`);
+            const json = await res.json();
+
+            if (res.status === 200) {
+              const username = json.username;
+
+              if (!username || username.trim() === "") {
+                setShowPopup(true); // Show popup to enter Commudle username
+              } else {
+                const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+                const json = await res.json();
+                if (json.status === 200 && json.data) {
+                  //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
+                  const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
+                  matchProfiles(userTags); // Start Swiping
+                  setShowPopup(false);
+                } else {
+                  console.log("User not found. Try again!");
+                }
+              }
+            } else {
+              console.log("User not found. Try again!");
+            }
+          } catch (e) {
+            console.log("Something went wrong");
+            console.error(e);
+          }
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -37,7 +64,6 @@ export default function SwipeRecords() {
     };
 
     checkUser();
-    checkUsername();
   }, []);
 
 
@@ -77,41 +103,6 @@ export default function SwipeRecords() {
       setShowPopup(false);
     }
   };
-
- const checkUsername = async () => {
-    try {
-      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${userData}`);
-      const json = await res.json();
-
-      if (res.status === 200) {
-        const username = json.username;
-
-        if (!username || username.trim() === "") {
-          setShowPopup(true); // Show popup to enter Commudle username
-        } else {
-          const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
-          const json = await res.json();
-          if (json.status === 200 && json.data) {
-            //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
-            const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
-            matchProfiles(userTags); // Start Swiping
-            setShowPopup(false);
-          } else {
-            console.log("User not found. Try again!");
-          }
-        }
-      } else {
-        console.log("User not found. Try again!");
-      }
-    } catch (e) {
-      console.log("Something went wrong");
-      console.error(e);
-    }
-  };
-  
-
-
-
   const matchProfiles = async (userTags) => {
     try {
       // Make API request

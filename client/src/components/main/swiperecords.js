@@ -48,7 +48,7 @@ export default function SwipeRecords() {
                     tags: json2.tags || [],
                     subscribedTo: json2.subscribedTo || []
                   });
-                  const userTags = json2.tags.map(tag => tag.name.toLowerCase());
+                  const userTags = json2.tags.map(tag => tag.toLowerCase());
                   setPreMatches(json2.subscribedTo); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);

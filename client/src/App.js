@@ -5,7 +5,7 @@ import LoginPage from "./components/authentication/LoginPage";
 import SwipeRecords from "./components/main/swiperecords";
 
 const ProtectedRoute = ({ user, children }) => {
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   return children;
 };
 

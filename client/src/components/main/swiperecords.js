@@ -266,7 +266,7 @@ export default function SwipeRecords() {
 
   const handleSwipe = async (likedProfile) => {
     try {
-      if (!userData?.username) {
+      if (!userInfo?.username) {
         console.error("Current user username not available");
         return;
       }
@@ -282,7 +282,7 @@ export default function SwipeRecords() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: userData.username, 
+          username: userInfo.username, 
           subscribedTo: [likedProfile.username], 
         }),
       });

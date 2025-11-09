@@ -102,9 +102,17 @@ const updateUser = async (req, res) => {
     };
 
     // Update the user document
-    await db.collection("users").where("uuid", "==", uuid).update(updates);
+    const snapshot = await db.collection("users").where("uuid", "==", uuid).get();
+    if (!snapshot.empty) {
+      snapshot.forEach(async (doc) => {
+        await doc.ref.update(updates);
+      });
+    }
 
     res.status(200).json({ message: "Username updated successfully" });
+        
+
+    
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Failed to update user" });

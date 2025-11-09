@@ -376,26 +376,22 @@ export default function SwipeRecords() {
             <h2 className="text-xl font-semibold text-gray-100 mb-1">
               {userData.displayName || "Anonymous"}
             </h2>
-            <p className="text-gray-300 text-sm mb-2">{userData.bio || "No bio available"}</p>
+            <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p>
 
             {/* Hacker profile info */}
-            {recommended.length > 0 && (
-              <>
-                <div>
-                  <p className="text-gray-400 text-sm">{userInfo.bio}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {userInfo.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
-                      >
-                        #{tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+            <div>
+              <p className="text-gray-400 text-sm">{userInfo.bio}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {userInfo.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
+              </div>
+            </div>
 
             <Button
               className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold w-full"

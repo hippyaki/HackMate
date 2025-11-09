@@ -73,7 +73,7 @@ export default function SwipeRecords() {
 
   useEffect(() => {
     const fetchCommudleData = async () => {
-      if (!userData?.username || userData.username.trim() === "") {
+      if (!userData.username || userData.username.trim() === "") {
         setError("Username not found. Please update your Commudle username.");
         return;
       }
@@ -99,11 +99,11 @@ export default function SwipeRecords() {
     };
 
     fetchCommudleData();
-  }, [userData?.username]);
+  }, [userData.username]);
 
   const setUserData = async (username) => {
     try {
-      if (!userData?.uid) {
+      if (!userData.uid) {
         console.error("User UID not available");
         return;
       }
@@ -152,7 +152,7 @@ export default function SwipeRecords() {
       const payload = {
         uid: String(userData.uid || ""), // ensure string
         username: trimmed,
-        name: (commudleData?.name || userData?.displayName || "").trim(),
+        name: (commudleData?.name || userData.displayName || "").trim(),
         bio: (commudleData?.bio || commudleData?.about_me || "") || "",
         tags: Array.isArray(commudleData?.tags)
           ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
@@ -162,7 +162,7 @@ export default function SwipeRecords() {
         subscribedTo: commudleData?.subscribedTo || [],
         postsTokenId: commudleData?.postsTokenId || "",
         visibility: commudleData?.visibility || "public",
-        photoURL: (commudleData?.photo?.url) || userData?.photoURL || "",
+        photoURL: (commudleData?.photo?.url) || userData.photoURL || "",
       };
 
       try {
@@ -255,7 +255,7 @@ export default function SwipeRecords() {
 
   const handleSwipe = async (likedProfile) => {
     try {
-      if (!userData?.username) {
+      if (!userData.username) {
         console.error("Current user username not available");
         return;
       }

@@ -27,10 +27,6 @@ const App = () => {
     <Router>
       <div>
         <Routes>
-          {/* Authentication Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           
           {/* SwipeRecords Route - Protected */}
           <Route 

@@ -47,17 +47,17 @@ const LoginPage = ({ switchToSignUp }) => {
       console.log('Google logged in user:', result.user);
 
       try {
-        // 1️⃣ Check if uid exists
-        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${result.user.uid}`);
+        // 1️⃣ Check if uuid exists
+        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check?uuid=${result.user.uid}`);
         const checkData = await checkResponse.json();
 
         if (!checkData.exists) {
-          // 2️⃣ UID does not exist → create new user
+          // 2️⃣ uuid does not exist → create new user
           const createResponse = await fetch('https://hackmate-rv8q.onrender.com/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              uid: result.user.uid,
+              uuid: result.user.uid,
               name: result.user.displayName,
               username: "",
               email: result.user.email,
@@ -130,7 +130,7 @@ const LoginPage = ({ switchToSignUp }) => {
             className="h-40 w-auto object-contain"
           />
         </div>
-        <div className=" text-8xl text-center">
+        <div className=" text-6xl text-center">
           <h1 style={{ fontFamily: 'HackMateFont' }}>HackMate</h1>
         </div>
 

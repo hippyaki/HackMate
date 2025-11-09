@@ -4,9 +4,10 @@ const { getAllUsers, getUserByUid, addUser, checkUID, updateUser } = require("..
 const router = express.Router();
 
 router.get("/all", getAllUsers);
-router.get("/", getUserByUid);
-router.get("/check/:uid", checkUID);
+router.get("/check", checkUID); // specific route first
+router.get("/", getUserByUid);   // general route last
 router.post("/", addUser);
-router.put("/:uid", updateUser);
+router.put("/", updateUser);
+
 
 module.exports = router;

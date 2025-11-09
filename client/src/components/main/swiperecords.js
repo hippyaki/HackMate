@@ -4,75 +4,199 @@ import { motion } from "framer-motion";
 import { User, Heart, Users, UserCircle } from "lucide-react";
 import Button from "../ui/button";
 import { Card } from "../ui/card";
+import AuthService from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export default function SwipeRecords() {
-  const [username, setUsername] = useState("");
-  const [showPopup, setShowPopup] = useState(true);
-  // const [userData, setUserData] = useState(null);
+  const [userInfo, setUserInfo] = useState({ bio: "", tags: [] });
+  const [uname, setUsername] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [userData, setUser] = useState(null);
   const [matches, setMatches] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");
   const rocketContainerRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  const dummyProfiles = [
-    {
-      name: "Aditi Sharma",
-      about: "Frontend dev & UI enthusiast 🌈",
-      tags: ["web development", "ui design", "javascript"],
-      img: "https://randomuser.me/api/portraits/women/81.jpg",
-    },
-    {
-      name: "Rohit Singh",
-      about: "Linux nerd + backend pro 🧠",
-      tags: ["linux", "problem solving", "python"],
-      img: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      name: "Priya Patel",
-      about: "Exploring network security and IoT 🔒",
-      tags: ["iot", "network security", "cloud computing"],
-      img: "https://randomuser.me/api/portraits/women/55.jpg",
-    },
-  ];
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          console.log('Current User:', currentUser);
+          setUser(currentUser);
+          try {
+            const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${currentUser.uid}`);
+            const json = await res.json();
 
-  const fetchProfile = async () => {
+            if (res.status === 200) {
+              const username = json.username;
+
+              if (!username || username.trim() === "") {
+                setShowPopup(true); // Show popup to enter Commudle username
+              } else {
+                const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+                const json = await res.json();
+                if (json.status === 200 && json.data) {
+                  const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
+                  matchProfiles(userTags); // Start Swiping
+                  setShowPopup(false);
+                  setUserData(username);
+                } else {
+                  console.log("User not found. Try again!");
+                  setShowPopup(true);
+                }
+              }
+            } else {
+              console.log("User not found. Try again!");
+              setShowPopup(true);
+            }
+          } catch (e) {
+            console.log("Something went wrong");
+            console.error(e);
+            setShowPopup(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setShowPopup(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchCommudleData = async () => {
+      if (!userData?.username || userData.username.trim() === "") {
+        setError("Username not found. Please update your Commudle username.");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `https://json.commudle.com/api/v2/users?username=${userData.username}`
+        );
+        const json = await res.json();
+
+        if (res.ok && json.status === 200 && json.data) {
+          setUserInfo({
+            bio: json.data.about_me || "No bio available",
+            tags: json.data.tags?.map((tag) => tag.name) || [],
+          });
+        } else {
+          setError("Commudle user not found.");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch Commudle data.");
+      }
+    };
+
+    fetchCommudleData();
+  }, [userData?.username]);
+
+  const setUserData = async (username) => {
     try {
-      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
+      if (!userData?.uid) {
+        console.error("User UID not available");
+        return;
+      }
+
+      // Make API request to update user
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uuid: userData.uid,  // Use uid from userData
+          username: username.trim(),
+        }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        console.log("User updated successfully:", json);
+        // Optionally update local state
+        setUser((prev) => ({ ...prev, username: username.trim() }));
+      } else {
+        console.error("Failed to update user:", json.message);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
+
+  const handleLogout = async () => {
+    try {
+        const result = await AuthService.logout();
+  
+        if (result.success) {
+          setSuccess(true);
+          console.log('User Logged Out', result.user);
+          navigate('/');
+          // Navigate or notify the user to verify their email
+        } else {
+          setError(result.error.message);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred.');
+      } finally {
+        setIsLoading(false);
+      }
+  };
+
+  const fetchProfile = async (uname) => {
+    try {
+      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
-        setUserData(json.data);
-        matchProfiles(json.data.tags.map((t) => t.name.toLowerCase()));
+        const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
+        matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
+        setUserData(uname);
       } else {
-        alert("User not found. Try again!");
+        console.log("User not found. Try again!");
       }
     } catch (e) {
-      alert("Error fetching Commudle data.");
+      console.log("Error fetching Matches");
+      setShowPopup(false);
     }
   };
-
-  const setUserData = async (userData) => {
+  const matchProfiles = async (userTags) => {
     try {
-      const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
-      const json = await res.json();
-      if (json.status === 200 && json.data) {
-       console.log("Updated", json.data);
-      } else {
-        alert("User not found. Try again!");
+      // Make API request
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/match", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tags: userTags }), // send tags in body
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch matched profiles");
       }
-    } catch (e) {
-      alert("Error fetching Commudle data.");
+
+      const data = await res.json();
+      // Optionally, you can sort by matchScore if API doesn't already sort
+      const sorted = data.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+
+      // Set recommended users
+      setRecommended(sorted);
+    } catch (error) {
+      console.error("Error matching profiles:", error);
     }
   };
 
-  const matchProfiles = (userTags) => {
-    const scored = dummyProfiles.map((p) => {
-      const score = p.tags.filter((tag) => userTags.includes(tag.toLowerCase())).length;
-      return { ...p, score };
-    });
-    const sorted = scored.sort((a, b) => b.score - a.score);
-    setRecommended(sorted);
-  };
 
   const handleSwipe = (likedProfile) => {
     setMatches((prev) => [...prev, likedProfile]);
@@ -136,12 +260,15 @@ export default function SwipeRecords() {
             </h2>
             <input
               type="text"
-              value={username}
+              value={uname}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. gdg-noida"
               className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
             />
-            <Button className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" onClick={fetchProfile}>
+            <Button 
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" 
+              onClick={() => fetchProfile(uname)}
+            >
               Continue
             </Button>
           </Card>
@@ -162,20 +289,16 @@ export default function SwipeRecords() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
-                <img
-                  src={recommended[0].img}
-                  alt={recommended[0].name}
-                  className="rounded-2xl w-full h-64 object-cover mb-4 border border-white/20"
-                />
+              
                 <h2 className="text-xl font-semibold">{recommended[0].name}</h2>
-                <p className="text-gray-300 text-sm mb-3">{recommended[0].about}</p>
+                <p className="text-gray-300 text-sm mb-3">{recommended[0].about_me}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recommended[0].tags.map((tag) => (
                     <span
-                      key={tag}
+                      key={tag.id}
                       className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
                     >
-                      #{tag}
+                      #{tag.name}
                     </span>
                   ))}
                 </div>
@@ -202,20 +325,81 @@ export default function SwipeRecords() {
       {/* Matches Tab */}
       {tab === "matches" && (
         <div className="flex-1 p-4 z-10">
-          <h2 className="text-lg font-semibold mb-2">Your Matches</h2>
+          <h2 className="text-lg font-semibold mb-2 text-gray-100">Your Matches</h2>
           {matches.length === 0 ? (
             <p className="text-gray-500 text-sm">No matches yet 😅</p>
           ) : (
-            matches.map((m) => (
-              <Card key={m.name} className="p-3 mb-3 flex gap-3 items-center bg-white/2 backdrop-blur-md border border-white/20">
-                <img src={m.img} alt={m.name} className="w-12 h-12 rounded-full" />
-                <div>
-                  <h3 className="font-semibold text-gray-100">{m.name}</h3>
-                  <p className="text-xs text-gray-400">{m.about}</p>
-                </div>
-              </Card>
-            ))
+            <div className="max-h-[400px] overflow-y-auto space-y-3">
+              {matches.map((m) => (
+                <Card
+                  key={m.name}
+                  className="p-3 flex gap-3 items-start bg-white/5 backdrop-blur-md border border-white/20 rounded-lg"
+                >
+                  <img
+                    src={m.img}
+                    alt={m.name}
+                    className="w-12 h-12 rounded-full flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-100">{m.name}</h3>
+                    <p className="text-xs text-gray-400 mt-1">{m.about}</p>
+                    {m.tags && m.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {m.tags.map((tag) => (
+                          <span
+                            key={tag.id}
+                            className="bg-[#FF8C00] text-black px-2 py-0.5 rounded-full text-xs"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
+        </div>
+      )}
+
+
+      {/* Profile Tab */}
+      {tab === "profile" && userData && (
+        <div className="flex-1 p-4 z-10 flex flex-col items-center">
+          <Card className="w-80 p-4 flex flex-col items-center backdrop-blur-lg bg-white/2 border border-white/20">
+            <img
+              src={userData.photoURL || "/default-avatar.png"}
+              alt={userData.displayName || "User"}
+              className="w-24 h-24 rounded-full mb-4 border-2 border-[#FF8C00]"
+            />
+            <h2 className="text-xl font-semibold text-gray-100 mb-1">
+              {userData.displayName || "Anonymous"}
+            </h2>
+            {/* <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p> */}
+
+            {/* Hacker profile info */}
+            <div>
+              <p className="text-gray-400 text-sm">{userInfo.bio}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {userInfo.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold w-full"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </Card>
         </div>
       )}
 

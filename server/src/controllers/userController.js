@@ -12,16 +12,20 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// GET single user by UID
+// GET single user by uuid
 const getUserByUid = async (req, res) => {
   try {
-    const { uid } = req.body;
-    const userSnap = await db.collection("users").doc(uid).get();
+    const { uuid } = req.query;
 
-    if (!userSnap.exists) {
+    // Query the collection for a document where the uuid field matches
+    const userQuery = await db.collection("users").where("uuid", "==", uuid).get();
+
+    if (userQuery.empty) {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Assuming uuid is unique, take the first match
+    const userSnap = userQuery.docs[0];
     res.status(200).json({ id: userSnap.id, ...userSnap.data() });
   } catch (error) {
     console.error("Error fetching user:", error);
@@ -29,17 +33,18 @@ const getUserByUid = async (req, res) => {
   }
 };
 
+
 // POST add user
 const addUser = async (req, res) => {
   try {
-    const { uid, name, username, email, photoURL } = req.body;
+    const { uuid, name, username, email, photoURL } = req.body;
 
-    if (!name || !username || !email) {
-      return res.status(400).json({ error: "All fields (name, username, email) are required" });
+    if (!name || !uuid || !email) {
+      return res.status(400).json({ error: "All fields (name, uuid, email) are required" });
     }
 
     const docRef = await db.collection("users").add({
-      uid,
+      uuid,
       name,
       username,
       email,
@@ -57,35 +62,63 @@ const addUser = async (req, res) => {
 // GET check if username exists
 const checkUID = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uuid } = req.query;
 
-    const snapshot = await db.collection("users").where("uid", "==", uid).get();
+    const snapshot = await db.collection("users").where("uuid", "==", uuid).get();
 
     if (snapshot.empty) {
       return res.status(200).json({ exists: false });
     }
 
-    res.status(200).json({ exists: true });
+    // Assuming uuid is unique, we take the first document
+    const userDoc = snapshot.docs[0].data();
+    const username = userDoc.username; // get the username field
+
+    res.status(200).json({ exists: true, username });
   } catch (error) {
-    console.error("Error checking uid:", error);
-    res.status(500).json({ error: "Error checking uid" });
+    console.error("Error checking uuid:", error);
+    res.status(500).json({ error: "Error checking uuid" });
   }
 };
 
-// PUT update hacker
+
+// PUT update user
 const updateUser = async (req, res) => {
   try {
-    const { uid } = req.params;
-    const updates = { ...req.body, updatedAt: Date.now() };
+    const { uuid, username } = req.body;
 
-    await db.collection("users").doc(uid).update(updates);
+    if (!uuid) {
+      return res.status(400).json({ message: "User UUID is required" });
+    }
 
-    res.status(200).json({ message: "Hacker updated successfully" });
+    if (!username || username.trim() === "") {
+      return res.status(400).json({ message: "Username cannot be empty" });
+    }
+
+    // Prepare the update object
+    const updates = {
+      username: username.trim(),
+      updatedAt: Date.now(),
+    };
+
+    // Update the user document
+    const snapshot = await db.collection("users").where("uuid", "==", uuid).get();
+    if (!snapshot.empty) {
+      snapshot.forEach(async (doc) => {
+        await doc.ref.update(updates);
+      });
+    }
+
+    res.status(200).json({ message: "Username updated successfully" });
+        
+
+    
   } catch (error) {
-    console.error("Error updating hacker:", error);
-    res.status(500).json({ message: "Failed to update hacker" });
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Failed to update user" });
   }
 };
+
 
 module.exports = {
   getAllUsers,

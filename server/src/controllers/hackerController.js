@@ -15,8 +15,8 @@ const getAllHackers = async (req, res) => {
 // GET hacker by UID
 const getHackerById = async (req, res) => {
   try {
-    const { uid } = req.params;
-    const hackerSnap = await db.collection("hackers").doc(uid).get();
+    const { uid } = req.query;
+    const hackerSnap = await db.collection("hackers").where("uid", "==", uid).get();
 
     if (!hackerSnap.exists) {
       return res.status(404).json({ message: "Hacker not found" });
@@ -43,6 +43,7 @@ const createHacker = async (req, res) => {
       subscribedTo = [],
       postsTokenId = "",
       visibility = "public",
+      photoURL = ""
     } = req.body;
 
     if (!uid || !username) {
@@ -67,6 +68,7 @@ const createHacker = async (req, res) => {
       subscribersCount: 0,
       postsTokenId,
       visibility,
+      photoURL,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -81,7 +83,7 @@ const createHacker = async (req, res) => {
 // PUT update hacker
 const updateHacker = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     const updates = { ...req.body, updatedAt: Date.now() };
 
     await db.collection("hackers").doc(uid).update(updates);
@@ -96,7 +98,7 @@ const updateHacker = async (req, res) => {
 // DELETE hacker
 const deleteHacker = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     await db.collection("hackers").doc(uid).delete();
 
     res.status(200).json({ message: "Hacker deleted successfully" });
@@ -106,10 +108,43 @@ const deleteHacker = async (req, res) => {
   }
 };
 
+// POST /hackers/match
+// Request body: { tags: ["web development", "dsa problem solving"] }
+const getHackerMatches = async (req, res) => {
+  try {
+    const inputTags = req.body.tags;
+    if (!Array.isArray(inputTags) || inputTags.length === 0) {
+      return res.status(400).json({ message: "tags array is required in request body" });
+    }
+
+    const snapshot = await db.collection("hackers").get();
+    const hackers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Compute matching score based on common tags
+    const hackersWithScore = hackers.map(hacker => {
+      const hackerTags = (hacker.tags || []).map(t => t.name);
+      const commonTags = hackerTags.filter(tag => inputTags.includes(tag));
+      return {
+        ...hacker,
+        matchScore: commonTags.length
+      };
+    });
+
+    // Sort by matchScore descending
+    hackersWithScore.sort((a, b) => b.matchScore - a.matchScore);
+
+    res.status(200).json(hackersWithScore);
+  } catch (error) {
+    console.error("Error fetching hacker matches:", error);
+    res.status(500).json({ message: "Failed to fetch hacker matches" });
+  }
+};
+
 module.exports = {
   getAllHackers,
   getHackerById,
   createHacker,
   updateHacker,
   deleteHacker,
+  getHackerMatches
 };

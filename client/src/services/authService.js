@@ -37,7 +37,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 // const storage = getFirestore(app);
 const storage = getStorage();
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
 const googleProvider = new GoogleAuthProvider();
 
 class AuthService {

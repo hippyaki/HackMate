@@ -52,10 +52,10 @@ export default function SwipeRecords() {
                   setPreMatches(json2.subscribedTo); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
-                  setUserData(username, currentUser);
                 } 
                 else {
-                  console.log("User not found. Try again!");
+                  console.log("User not found on Hackers. Creating new user!");
+                  // setUserData(username);
                   setShowPopup(true);
                 }
               }
@@ -82,92 +82,97 @@ export default function SwipeRecords() {
     checkUser();
   }, []);
 
-  const setUserData = async (username, currentUser) => {
-    try {
-      console.log("CurrentUser:", currentUser);
-      if (!currentUser?.uid) {
-        console.error("User UID not available");
-        return;
-      }
-
-      const trimmed = username?.trim();
-      if (!trimmed) {
-        console.error("Username is empty");
-        return;
-      }
-
-      const updateRes = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uuid: currentUser.uid,
-          username: trimmed,
-        }),
-      });
-
-      const updateJson = await updateRes.json();
-
-      if (!updateRes.ok) {
-        console.error("Failed to update user:", updateJson);
-        return;
-      }
-
-      console.log("User updated successfully:", updateJson);
-      // update local state
-      setUser((prev) => ({ ...prev, username: trimmed }));
-
-      let commudleData = null;
+  const setUserData = async (username) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (currentUser) {
       try {
-        const commuRes = await fetch(
-          `https://json.commudle.com/api/v2/users?username=${encodeURIComponent(trimmed)}`
-        );
-        const commuJson = await commuRes.json();
-        if (commuRes.ok && commuJson.status === 200 && commuJson.data) {
-          commudleData = commuJson.data;
-        } else {
-          console.warn("Commudle user not found or returned non-200. Proceeding with limited data.");
+        console.log("CurrentUser:", currentUser);
+        if (!currentUser?.uid) {
+          console.error("User UID not available");
+          return;
         }
-      } catch (err) {
-        console.warn("Failed to fetch commudle profile:", err);
-      }
 
-      const payload = {
-        uid: String(currentUser.uid || ""), // ensure string
-        username: trimmed,
-        name: (commudleData?.name || currentUser?.displayName || "").trim(),
-        bio: (commudleData?.bio || commudleData?.about_me || "") || "",
-        tags: Array.isArray(commudleData?.tags)
-          ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
-          : [],
-        location: commudleData?.location || {},
-        scoreVector: commudleData?.scoreVector || {},
-        subscribedTo: commudleData?.subscribedTo || [],
-        postsTokenId: commudleData?.postsTokenId || "",
-        visibility: commudleData?.visibility || "public",
-        photoURL: (commudleData?.photo?.url) || currentUser?.photoURL || "",
-      };
+        const trimmed = username?.trim();
+        if (!trimmed) {
+          console.error("Username is empty");
+          return;
+        }
 
-      try {
-        const createRes = await fetch("https://hackmate-rv8q.onrender.com/api/hackers", {
-          method: "POST",
+        const updateRes = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            uuid: currentUser.uid,
+            username: trimmed,
+          }),
         });
 
-        const createJson = await createRes.json();
+        const updateJson = await updateRes.json();
 
-        if (createRes.ok) {
-          console.log("Hacker account created successfully:", createJson);
-          // Optionally update some local state to reflect hacker creation
-          // e.g. setUser(prev=>({...prev, hackerCreated: true}));
-        } else {
-          console.error("Failed to create hacker account:", createJson);
+        if (!updateRes.ok) {
+          console.error("Failed to update user:", updateJson);
+          return;
         }
-      } catch (err) {
-        console.error("Error while creating hacker account:", err);
+
+        console.log("User updated successfully:", updateJson);
+        // update local state
+        setUser((prev) => ({ ...prev, username: trimmed }));
+
+        if (!userInfo?.username) {
+          let commudleData = null;
+          try {
+            const commuRes = await fetch(
+              `https://json.commudle.com/api/v2/users?username=${encodeURIComponent(trimmed)}`
+            );
+            const commuJson = await commuRes.json();
+            if (commuRes.ok && commuJson.status === 200 && commuJson.data) {
+              commudleData = commuJson.data;
+            } else {
+              console.warn("Commudle user not found or returned non-200. Proceeding with limited data.");
+            }
+          } catch (err) {
+            console.warn("Failed to fetch commudle profile:", err);
+          }
+
+          const payload = {
+            uid: String(currentUser.uid || ""), // ensure string
+            username: trimmed,
+            name: (commudleData?.name || currentUser?.displayName || "").trim(),
+            bio: (commudleData?.bio || commudleData?.about_me || "") || "",
+            tags: Array.isArray(commudleData?.tags)
+              ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
+              : [],
+            location: commudleData?.location || {},
+            scoreVector: commudleData?.scoreVector || {},
+            subscribedTo: commudleData?.subscribedTo || [],
+            postsTokenId: commudleData?.postsTokenId || "",
+            visibility: commudleData?.visibility || "public",
+            photoURL: (commudleData?.photo?.url) || currentUser?.photoURL || "",
+          };
+
+          try {
+            const createRes = await fetch("https://hackmate-rv8q.onrender.com/api/hackers", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            const createJson = await createRes.json();
+
+            if (createRes.ok) {
+              console.log("Hacker account created successfully:", createJson);
+              // Optionally update some local state to reflect hacker creation
+              // e.g. setUser(prev=>({...prev, hackerCreated: true}));
+            } else {
+              console.error("Failed to create hacker account:", createJson);
+            }
+          } catch (err) {
+            console.error("Error while creating hacker account:", err);
+          }
+        }
+      } catch (error) {
+        console.error("Error updating user:", error);
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
     }
   };
 
@@ -217,15 +222,16 @@ export default function SwipeRecords() {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
-        setUserInfo({
-          username: uname,
-          bio: json.data.about_me || "No bio available",
-          tags: json.data.tags?.map((tag) => tag.name) || []
-        });
+        // setUserInfo({
+        //   username: uname,
+        //   bio: json.data.about_me || "No bio available",
+        //   tags: json.data.tags?.map((tag) => tag.name) || []
+        // });
+        setUserData(uname);
         const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
-        setUserData(uname);
+        
       } else {
         console.log("User not found. Try again!");
       }
@@ -422,19 +428,21 @@ export default function SwipeRecords() {
 
       {/* Matches Tab */}
       {tab === "matches" && (
-        <div className="flex-1 p-4 z-10">
-          <h2 className="text-lg font-semibold mb-2 text-gray-100">Your Matches</h2>
+        <div className="flex flex-col flex-1 px-4 pt-4 pb-[80px] z-10"> 
+          {/* pb-[80px] ensures content stays above bottom nav */}
+          <h2 className="text-lg font-semibold mb-3 text-gray-100">Your Matches</h2>
+
           {matches.length === 0 ? (
             <p className="text-gray-500 text-sm">No matches yet 😅</p>
           ) : (
-            <div className="max-h-[400px] overflow-y-auto space-y-3">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
               {matches.map((m) => (
                 <Card
                   key={m.name}
                   className="p-3 flex gap-3 items-start bg-white/5 backdrop-blur-md border border-white/20 rounded-lg"
                 >
                   <img
-                    src={m.img}
+                    src={m.photoURL || "/default-avatar.png"}
                     alt={m.name}
                     className="w-12 h-12 rounded-full flex-shrink-0"
                   />
@@ -460,6 +468,7 @@ export default function SwipeRecords() {
           )}
         </div>
       )}
+
 
 
       {/* Profile Tab */}
@@ -492,7 +501,7 @@ export default function SwipeRecords() {
             </div>
 
             <Button
-              className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold w-full"
+              className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold w-full mt-4"
               onClick={handleLogout}
             >
               Logout

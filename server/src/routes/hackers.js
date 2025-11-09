@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 router.get("/all", getAllHackers);
-router.get("/match", getHackerMatches); // specific route first
+router.post("/match", getHackerMatches); // specific route first
 router.get("/", getHackerById);     // general route last
 router.post("/", createHacker);
 router.put("/", updateHacker);

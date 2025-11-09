@@ -25,7 +25,9 @@ export default function SwipeRecords() {
       try {
         const currentUser = await AuthService.getCurrentUser();
         if (currentUser) {
+          console.log('Current User:', currentUser);
           setUser(currentUser);
+          console.log('Current User:', userData);
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -78,7 +80,7 @@ export default function SwipeRecords() {
 
  const checkUsername = async () => {
     try {
-      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${userData.uid}`);
+      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${userData}`);
       const json = await res.json();
 
       if (res.status === 200) {

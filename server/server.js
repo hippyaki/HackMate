@@ -4,16 +4,34 @@ const express = require("express");
 const app = express();
 
 
-// app.use(cors());
-app.use(express.json());
+const allowedOrigins = [
+  "https://hackmate-rv8q.onrender.com",
+  "https://hackmate-gdg.onrender.com",
+  "https://hackmate-gdg.web.app",
+  "https://hackmate-gdg.firebaseapp.com",
+  "localhost",
+];
 
-//Important Headers for public uses
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
   next();
 });
+
+app.use(express.json());
+
 
 // routes
 app.use("/api/users", userRoutes);

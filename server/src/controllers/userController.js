@@ -12,11 +12,11 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// GET single user by UID
+// GET single user by uuid
 const getUserByUid = async (req, res) => {
   try {
-    const { uid } = req.params;
-    const userSnap = await db.collection("users").doc(uid).get();
+    const { uuid } = req.params;
+    const userSnap = await db.collection("users").doc(uuid).get();
 
     if (!userSnap.exists) {
       return res.status(404).json({ error: "User not found" });
@@ -32,14 +32,14 @@ const getUserByUid = async (req, res) => {
 // POST add user
 const addUser = async (req, res) => {
   try {
-    const { uid, name, username, email, photoURL } = req.body;
+    const { uuid, name, username, email, photoURL } = req.body;
 
-    if (!name || !uid || !email) {
-      return res.status(400).json({ error: "All fields (name, uid, email) are required" });
+    if (!name || !uuid || !email) {
+      return res.status(400).json({ error: "All fields (name, uuid, email) are required" });
     }
 
     const docRef = await db.collection("users").add({
-      uid,
+      uuid,
       name,
       username,
       email,
@@ -57,22 +57,22 @@ const addUser = async (req, res) => {
 // GET check if username exists
 const checkUID = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uuid } = req.params;
 
-    const snapshot = await db.collection("users").where("uid", "==", uid).get();
+    const snapshot = await db.collection("users").where("uuid", "==", uuid).get();
 
     if (snapshot.empty) {
       return res.status(200).json({ exists: false });
     }
 
-    // Assuming uid is unique, we take the first document
+    // Assuming uuid is unique, we take the first document
     const userDoc = snapshot.docs[0].data();
     const username = userDoc.username; // get the username field
 
     res.status(200).json({ exists: true, username });
   } catch (error) {
-    console.error("Error checking uid:", error);
-    res.status(500).json({ error: "Error checking uid" });
+    console.error("Error checking uuid:", error);
+    res.status(500).json({ error: "Error checking uuid" });
   }
 };
 
@@ -80,10 +80,10 @@ const checkUID = async (req, res) => {
 // PUT update user
 const updateUser = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uuid } = req.params;
     const updates = { ...req.body, updatedAt: Date.now() };
 
-    await db.collection("users").doc(uid).update(updates);
+    await db.collection("users").doc(uuid).update(updates);
 
     res.status(200).json({ message: "user updated successfully" });
   } catch (error) {

@@ -67,16 +67,16 @@ export default function SwipeRecords() {
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
       } else {
-        alert("User not found. Try again!");
+        console.log("User not found. Try again!");
       }
     } catch (e) {
-      alert("Error fetching Commudle data.");
+      console.log("Error fetching Commudle data.");
     }
   };
 
  const checkUsername = async () => {
     try {
-      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uid=${userData.uid}`);
+      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users/${userData.uid}`);
       const json = await res.json();
 
       if (res.status === 200) {
@@ -93,14 +93,14 @@ export default function SwipeRecords() {
             matchProfiles(userTags); // Start Swiping
             setShowPopup(false);
           } else {
-            alert("User not found. Try again!");
+            console.log("User not found. Try again!");
           }
         }
       } else {
-        alert("User not found. Try again!");
+        console.log("User not found. Try again!");
       }
     } catch (e) {
-      alert("Error fetching Commudle data.");
+      console.log("Error fetching Commudle data.");
       console.error(e);
     }
   };

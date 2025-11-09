@@ -85,17 +85,32 @@ const checkUID = async (req, res) => {
 // PUT update user
 const updateUser = async (req, res) => {
   try {
-    const { uuid } = req.body;
-    const updates = { ...req.body, updatedAt: Date.now() };
+    const { uuid, username } = req.body;
 
+    if (!uuid) {
+      return res.status(400).json({ message: "User UUID is required" });
+    }
+
+    if (!username || username.trim() === "") {
+      return res.status(400).json({ message: "Username cannot be empty" });
+    }
+
+    // Prepare the update object
+    const updates = {
+      username: username.trim(),
+      updatedAt: Date.now(),
+    };
+
+    // Update the user document
     await db.collection("users").doc(uuid).update(updates);
 
-    res.status(200).json({ message: "user updated successfully" });
+    res.status(200).json({ message: "Username updated successfully" });
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Failed to update user" });
   }
 };
+
 
 module.exports = {
   getAllUsers,

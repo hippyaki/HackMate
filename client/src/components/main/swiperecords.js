@@ -8,6 +8,7 @@ import AuthService from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 export default function SwipeRecords() {
+  const [userInfo, setUserInfo] = useState({ bio: "", tags: [] });
   const [uname, setUsername] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [userData, setUser] = useState(null);
@@ -40,10 +41,10 @@ export default function SwipeRecords() {
                 const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
                 const json = await res.json();
                 if (json.status === 200 && json.data) {
-                  //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
                   const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
+                  setUserData(username);
                 } else {
                   console.log("User not found. Try again!");
                   setShowPopup(true);
@@ -70,6 +71,69 @@ export default function SwipeRecords() {
     checkUser();
   }, []);
 
+  useEffect(() => {
+    const fetchCommudleData = async () => {
+      if (!userData?.username || userData.username.trim() === "") {
+        setError("Username not found. Please update your Commudle username.");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `https://json.commudle.com/api/v2/users?username=${userData.username}`
+        );
+        const json = await res.json();
+
+        if (res.ok && json.status === 200 && json.data) {
+          setUserInfo({
+            bio: json.data.bio || "No bio available",
+            tags: json.data.tags?.map((tag) => tag.name) || [],
+          });
+        } else {
+          setError("Commudle user not found.");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch Commudle data.");
+      }
+    };
+
+    fetchCommudleData();
+  }, [userData?.username]);
+
+  const setUserData = async (username) => {
+    try {
+      if (!userData?.uid) {
+        console.error("User UID not available");
+        return;
+      }
+
+      // Make API request to update user
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uuid: userData.uid,  // Use uid from userData
+          username: username.trim(),
+        }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        console.log("User updated successfully:", json);
+        // Optionally update local state
+        setUser((prev) => ({ ...prev, username: username.trim() }));
+      } else {
+        console.error("Failed to update user:", json.message);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
 
   const handleLogout = async () => {
     try {
@@ -95,10 +159,10 @@ export default function SwipeRecords() {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
       if (json.status === 200 && json.data) {
-        //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
         const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
         matchProfiles(userTags); // Start Swiping
         setShowPopup(false);
+        setUserData(uname);
       } else {
         console.log("User not found. Try again!");
       }
@@ -201,7 +265,10 @@ export default function SwipeRecords() {
               placeholder="e.g. gdg-noida"
               className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
             />
-            <Button className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" onClick={fetchProfile(uname)}>
+            <Button 
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" 
+              onClick={() => fetchProfile(uname)}
+            >
               Continue
             </Button>
           </Card>
@@ -314,17 +381,19 @@ export default function SwipeRecords() {
             {/* Hacker profile info */}
             {recommended.length > 0 && (
               <>
-                <div className="flex flex-wrap gap-2 mb-3 justify-center">
-                  {recommended[0].tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
-                    >
-                      #{tag.name}
-                    </span>
-                  ))}
+                <div>
+                  <p className="text-gray-400 text-sm">{userInfo.bio}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {userInfo.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+                      >
+                        #{tag.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-gray-400 text-xs mb-3">{recommended[0].about || recommended[0].bio}</p>
               </>
             )}
 

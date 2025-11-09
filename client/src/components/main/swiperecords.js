@@ -17,6 +17,9 @@ export default function SwipeRecords() {
   const [tab, setTab] = useState("main");
   const rocketContainerRef = useRef(null);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {

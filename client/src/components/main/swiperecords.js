@@ -1,7 +1,7 @@
 // SwipeRecords.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { IdCardLanyard, Heart, Users, UserCircle, Component } from "lucide-react";
+import { Radar, Heart, Users, UserCircle, Component } from "lucide-react";
 import Button from "../ui/button";
 import { Card } from "../ui/card";
 import AuthService from '../../services/authService';
@@ -542,7 +542,7 @@ export default function SwipeRecords() {
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-[#333] flex justify-around py-2 z-50">
         <button onClick={() => setTab("main")}>
-          <IdCardLanyard className={`w-8 h-8 ${tab === "main" ? "text-[#FF8C00]" : "text-gray-400"}`} />
+          <Radar className={`w-8 h-8 ${tab === "main" ? "text-[#FF8C00]" : "text-gray-400"}`} />
         </button>
         <button onClick={() => setTab("matches")}>
           <Users className={`w-8 h-8 ${tab === "matches" ? "text-[#FF8C00]" : "text-gray-400"}`} />

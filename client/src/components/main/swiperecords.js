@@ -8,7 +8,7 @@ import AuthService from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 export default function SwipeRecords() {
-  const [username, setUsername] = useState("");
+  const [uname, setUsername] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [userData, setUser] = useState(null);
   const [matches, setMatches] = useState([]);

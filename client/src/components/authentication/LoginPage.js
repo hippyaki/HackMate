@@ -48,7 +48,7 @@ const LoginPage = ({ switchToSignUp }) => {
 
       try {
         // 1️⃣ Check if uuid exists
-        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${result.user.uuid}`);
+        const checkResponse = await fetch(`https://hackmate-rv8q.onrender.com/api/users/check/${result.user.uid}`);
         const checkData = await checkResponse.json();
 
         if (!checkData.exists) {
@@ -57,7 +57,7 @@ const LoginPage = ({ switchToSignUp }) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              uuid: result.user.uuid,
+              uuid: result.user.uid,
               name: result.user.displayName,
               username: "",
               email: result.user.email,

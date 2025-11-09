@@ -258,22 +258,44 @@ export default function SwipeRecords() {
       {/* Matches Tab */}
       {tab === "matches" && (
         <div className="flex-1 p-4 z-10">
-          <h2 className="text-lg font-semibold mb-2">Your Matches</h2>
+          <h2 className="text-lg font-semibold mb-2 text-gray-100">Your Matches</h2>
           {matches.length === 0 ? (
             <p className="text-gray-500 text-sm">No matches yet 😅</p>
           ) : (
-            matches.map((m) => (
-              <Card key={m.name} className="p-3 mb-3 flex gap-3 items-center bg-white/2 backdrop-blur-md border border-white/20">
-                <img src={m.img} alt={m.name} className="w-12 h-12 rounded-full" />
-                <div>
-                  <h3 className="font-semibold text-gray-100">{m.name}</h3>
-                  <p className="text-xs text-gray-400">{m.about}</p>
-                </div>
-              </Card>
-            ))
+            <div className="max-h-[400px] overflow-y-auto space-y-3">
+              {matches.map((m) => (
+                <Card
+                  key={m.name}
+                  className="p-3 flex gap-3 items-start bg-white/5 backdrop-blur-md border border-white/20 rounded-lg"
+                >
+                  <img
+                    src={m.img}
+                    alt={m.name}
+                    className="w-12 h-12 rounded-full flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-100">{m.name}</h3>
+                    <p className="text-xs text-gray-400 mt-1">{m.about}</p>
+                    {m.tags && m.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {m.tags.map((tag) => (
+                          <span
+                            key={tag.id}
+                            className="bg-[#FF8C00] text-black px-2 py-0.5 rounded-full text-xs"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       )}
+
 
       {/* Profile Tab */}
       {tab === "profile" && userData && (
@@ -295,10 +317,10 @@ export default function SwipeRecords() {
                 <div className="flex flex-wrap gap-2 mb-3 justify-center">
                   {recommended[0].tags.map((tag) => (
                     <span
-                      key={tag}
+                      key={tag.id}
                       className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
                     >
-                      #{tag}
+                      #{tag.name}
                     </span>
                   ))}
                 </div>

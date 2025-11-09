@@ -83,17 +83,51 @@ const createHacker = async (req, res) => {
 // PUT update hacker
 const updateHacker = async (req, res) => {
   try {
-    const { uid } = req.body;
+    const { username } = req.body;
+
+    if (!username || username.trim() === "") {
+      return res.status(400).json({ message: "Username is required to find the hacker." });
+    }
+
+    const q = await db.collection("hackers")
+      .where("username", "==", username.trim())
+      .limit(1)
+      .get();
+
+    if (q.empty) {
+      return res.status(404).json({ message: "Hacker with given username not found." });
+    }
+
+    const docRef = db.collection("hackers").doc(q.docs[0].id);
     const updates = { ...req.body, updatedAt: Date.now() };
+    delete updates.username;
 
-    await db.collection("hackers").doc(uid).update(updates);
+    if (Array.isArray(updates.subscribedTo)) {
+      const snap = await docRef.get();
+      const existingData = snap.data();
+      const currentSubscribed = Array.isArray(existingData.subscribedTo)
+        ? existingData.subscribedTo
+        : [];
 
-    res.status(200).json({ message: "Hacker updated successfully" });
+      updates.subscribedTo = Array.from(
+        new Set([...currentSubscribed, ...updates.subscribedTo])
+      );
+    }
+
+    await docRef.update(updates);
+    const updatedSnap = await docRef.get();
+
+    return res.status(200).json({
+      message: "Hacker updated successfully",
+      id: docRef.id,
+      data: updatedSnap.data(),
+    });
   } catch (error) {
     console.error("Error updating hacker:", error);
-    res.status(500).json({ message: "Failed to update hacker" });
+    return res.status(500).json({ message: "Failed to update hacker" });
   }
 };
+
 
 // DELETE hacker
 const deleteHacker = async (req, res) => {

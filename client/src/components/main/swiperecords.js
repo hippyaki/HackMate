@@ -108,31 +108,87 @@ export default function SwipeRecords() {
         return;
       }
 
-      // Make API request to update user
-      const res = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
+      const trimmed = username?.trim();
+      if (!trimmed) {
+        console.error("Username is empty");
+        return;
+      }
+
+      const updateRes = await fetch("https://hackmate-rv8q.onrender.com/api/users", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          uuid: userData.uid,  // Use uid from userData
-          username: username.trim(),
+          uuid: userData.uid,
+          username: trimmed,
         }),
       });
 
-      const json = await res.json();
+      const updateJson = await updateRes.json();
 
-      if (res.ok) {
-        console.log("User updated successfully:", json);
-        // Optionally update local state
-        setUser((prev) => ({ ...prev, username: username.trim() }));
-      } else {
-        console.error("Failed to update user:", json.message);
+      if (!updateRes.ok) {
+        console.error("Failed to update user:", updateJson);
+        return;
+      }
+
+      console.log("User updated successfully:", updateJson);
+      // update local state
+      setUser((prev) => ({ ...prev, username: trimmed }));
+
+      let commudleData = null;
+      try {
+        const commuRes = await fetch(
+          `https://json.commudle.com/api/v2/users?username=${encodeURIComponent(trimmed)}`
+        );
+        const commuJson = await commuRes.json();
+        if (commuRes.ok && commuJson.status === 200 && commuJson.data) {
+          commudleData = commuJson.data;
+        } else {
+          console.warn("Commudle user not found or returned non-200. Proceeding with limited data.");
+        }
+      } catch (err) {
+        console.warn("Failed to fetch commudle profile:", err);
+      }
+
+      const payload = {
+        uid: String(userData.uid || ""), // ensure string
+        username: trimmed,
+        name: (commudleData?.name || userData?.displayName || "").trim(),
+        bio: (commudleData?.bio || commudleData?.about_me || "") || "",
+        tags: Array.isArray(commudleData?.tags)
+          ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
+          : [],
+        location: commudleData?.location || {},
+        scoreVector: commudleData?.scoreVector || {},
+        subscribedTo: commudleData?.subscribedTo || [],
+        postsTokenId: commudleData?.postsTokenId || "",
+        visibility: commudleData?.visibility || "public",
+        photoURL: (commudleData?.photo?.url) || userData?.photoURL || "",
+      };
+
+      try {
+        const createRes = await fetch("https://hackmate-rv8q.onrender.com/api/hackers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const createJson = await createRes.json();
+
+        if (createRes.ok) {
+          console.log("Hacker account created successfully:", createJson);
+          // Optionally update some local state to reflect hacker creation
+          // e.g. setUser(prev=>({...prev, hackerCreated: true}));
+        } else {
+          console.error("Failed to create hacker account:", createJson);
+        }
+      } catch (err) {
+        console.error("Error while creating hacker account:", err);
       }
     } catch (error) {
       console.error("Error updating user:", error);
     }
   };
+
 
 
   const handleLogout = async () => {
@@ -173,7 +229,6 @@ export default function SwipeRecords() {
   };
   const matchProfiles = async (userTags) => {
     try {
-      // Make API request
       const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/match", {
         method: "POST",
         headers: {
@@ -198,12 +253,48 @@ export default function SwipeRecords() {
   };
 
 
-  const handleSwipe = (likedProfile) => {
-    setMatches((prev) => [...prev, likedProfile]);
-    setRecommended((prev) => prev.slice(1));
+  const handleSwipe = async (likedProfile) => {
+    try {
+      if (!userData?.username) {
+        console.error("Current user username not available");
+        return;
+      }
+
+      if (!likedProfile?.username) {
+        console.error("Liked profile username not available");
+        return;
+      }
+
+      const res = await fetch("https://hackmate-gdg.onrender.com/api/hackers", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userData.username, 
+          subscribedTo: [likedProfile.username], 
+        }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        console.log("SubscribedTo updated successfully:", json);
+      } else {
+        console.error("Failed to update SubscribedTo:", json.message || json);
+      }
+      // Update UI regardless of backend success
+      setMatches((prev) => [...prev, likedProfile]);
+      setRecommended((prev) => prev.slice(1));
+    } catch (error) {
+      console.error("Error updating SubscribedTo:", error);
+      // Still update the UI
+      setMatches((prev) => [...prev, likedProfile]);
+      setRecommended((prev) => prev.slice(1));
+    }
   };
 
-  // 🚀 Render rockets only once when component mounts
+
   useEffect(() => {
     const container = rocketContainerRef.current;
     if (!container) return;
@@ -376,18 +467,18 @@ export default function SwipeRecords() {
             <h2 className="text-xl font-semibold text-gray-100 mb-1">
               {userData.displayName || "Anonymous"}
             </h2>
-            {/* <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p> */}
+            <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p>
 
             {/* Hacker profile info */}
             <div>
-              <p className="text-gray-400 text-sm">{userInfo.bio}</p>
+              {/* <p className="text-gray-400 text-sm">{userInfo.bio}</p> */}
               <div className="flex flex-wrap gap-2 mt-2">
                 {userInfo.tags.map((tag) => (
                   <span
-                    key={tag.id}
+                    key={tag}
                     className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
                   >
-                    #{tag.name}
+                    #{tag}
                   </span>
                 ))}
               </div>

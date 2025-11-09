@@ -16,18 +16,23 @@ const getAllUsers = async (req, res) => {
 const getUserByUid = async (req, res) => {
   try {
     const { uuid } = req.query;
-    const userSnap = await db.collection("users").doc(uuid).get();
 
-    if (!userSnap.exists) {
+    // Query the collection for a document where the uuid field matches
+    const userQuery = await db.collection("users").where("uuid", "==", uuid).get();
+
+    if (userQuery.empty) {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Assuming uuid is unique, take the first match
+    const userSnap = userQuery.docs[0];
     res.status(200).json({ id: userSnap.id, ...userSnap.data() });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ error: "Error fetching user" });
   }
 };
+
 
 // POST add user
 const addUser = async (req, res) => {

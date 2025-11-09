@@ -16,7 +16,7 @@ const getAllHackers = async (req, res) => {
 const getHackerById = async (req, res) => {
   try {
     const { uid } = req.query;
-    const hackerSnap = await db.collection("hackers").doc(uid).get();
+    const hackerSnap = await db.collection("hackers").where("uid", "==", uid).get();
 
     if (!hackerSnap.exists) {
       return res.status(404).json({ message: "Hacker not found" });

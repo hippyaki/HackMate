@@ -76,7 +76,11 @@ export default function SwipeRecords() {
 
  const checkUsername = async () => {
     try {
-      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users/${userData.uid}`);
+      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uuid: userData.uid })
+      });
       const json = await res.json();
 
       if (res.status === 200) {
@@ -111,7 +115,7 @@ export default function SwipeRecords() {
   const matchProfiles = async (userTags) => {
     try {
       // Make API request
-      const res = await fetch("http://localhost:5000/api/hackers/match", {
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/match", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

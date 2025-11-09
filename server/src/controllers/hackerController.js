@@ -15,7 +15,7 @@ const getAllHackers = async (req, res) => {
 // GET hacker by UID
 const getHackerById = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     const hackerSnap = await db.collection("hackers").doc(uid).get();
 
     if (!hackerSnap.exists) {
@@ -83,7 +83,7 @@ const createHacker = async (req, res) => {
 // PUT update hacker
 const updateHacker = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     const updates = { ...req.body, updatedAt: Date.now() };
 
     await db.collection("hackers").doc(uid).update(updates);
@@ -98,7 +98,7 @@ const updateHacker = async (req, res) => {
 // DELETE hacker
 const deleteHacker = async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     await db.collection("hackers").doc(uid).delete();
 
     res.status(200).json({ message: "Hacker deleted successfully" });

@@ -34,8 +34,8 @@ const addUser = async (req, res) => {
   try {
     const { uid, name, username, email, photoURL } = req.body;
 
-    if (!name || !username || !email) {
-      return res.status(400).json({ error: "All fields (name, username, email) are required" });
+    if (!name || !uid || !email) {
+      return res.status(400).json({ error: "All fields (name, uid, email) are required" });
     }
 
     const docRef = await db.collection("users").add({

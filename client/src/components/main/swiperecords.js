@@ -1,7 +1,7 @@
 // SwipeRecords.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { User, Heart, Users, UserCircle } from "lucide-react";
+import { IdCardLanyard, Heart, Users, UserCircle, Component } from "lucide-react";
 import Button from "../ui/button";
 import { Card } from "../ui/card";
 import AuthService from '../../services/authService';
@@ -542,13 +542,13 @@ export default function SwipeRecords() {
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-[#333] flex justify-around py-2 z-50">
         <button onClick={() => setTab("main")}>
-          <Heart className={`w-8 h-8 ${tab === "main" ? "text-[#FF8C00]" : "text-gray-400"}`} />
+          <IdCardLanyard className={`w-8 h-8 ${tab === "main" ? "text-[#FF8C00]" : "text-gray-400"}`} />
         </button>
         <button onClick={() => setTab("matches")}>
-          <User className={`w-8 h-8 ${tab === "matches" ? "text-[#FF8C00]" : "text-gray-400"}`} />
+          <Users className={`w-8 h-8 ${tab === "matches" ? "text-[#FF8C00]" : "text-gray-400"}`} />
         </button>
         {/* <button onClick={() => setTab("groups")}>
-          <Users className={`w-6 h-6 ${tab === "groups" ? "text-[#FF8C00]" : "text-gray-400"}`} />
+          <Component className={`w-6 h-6 ${tab === "groups" ? "text-[#FF8C00]" : "text-gray-400"}`} />
         </button> */}
         <button onClick={() => setTab("profile")}>
           <UserCircle className={`w-8 h-8 ${tab === "profile" ? "text-[#FF8C00]" : "text-gray-400"}`} />

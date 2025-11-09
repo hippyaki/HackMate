@@ -39,8 +39,8 @@ export default function SwipeRecords() {
               if (!username || username.trim() === "") {
                 setShowPopup(true); // Show popup to enter Commudle username
               } else {
-                let res = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
-                let json = await res.json();
+                const res = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
+                const json = await res.json();
                 if (json.status === 200 && json.data) {
                   setUserInfo({
                     username: username,
@@ -53,7 +53,8 @@ export default function SwipeRecords() {
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
                   setUserData(username, currentUser);
-                } else {
+                } 
+                else {
                   console.log("User not found. Try again!");
                   setShowPopup(true);
                 }

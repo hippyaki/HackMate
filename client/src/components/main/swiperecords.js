@@ -265,7 +265,7 @@ export default function SwipeRecords() {
         return;
       }
 
-      const res = await fetch("https://hackmate-gdg.onrender.com/api/hackers", {
+      const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

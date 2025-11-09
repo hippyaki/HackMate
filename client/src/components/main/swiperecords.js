@@ -76,11 +76,7 @@ export default function SwipeRecords() {
 
  const checkUsername = async () => {
     try {
-      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uuid: userData.uid })
-      });
+      const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${userData.uid}`);
       const json = await res.json();
 
       if (res.status === 200) {
@@ -116,7 +112,7 @@ export default function SwipeRecords() {
     try {
       // Make API request
       const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/match", {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -277,6 +273,47 @@ export default function SwipeRecords() {
               </Card>
             ))
           )}
+        </div>
+      )}
+
+      {/* Profile Tab */}
+      {tab === "profile" && userData && (
+        <div className="flex-1 p-4 z-10 flex flex-col items-center">
+          <Card className="w-80 p-4 flex flex-col items-center backdrop-blur-lg bg-white/2 border border-white/20">
+            <img
+              src={userData.photoURL || "/default-avatar.png"}
+              alt={userData.displayName || "User"}
+              className="w-24 h-24 rounded-full mb-4 border-2 border-[#FF8C00]"
+            />
+            <h2 className="text-xl font-semibold text-gray-100 mb-1">
+              {userData.displayName || "Anonymous"}
+            </h2>
+            <p className="text-gray-300 text-sm mb-2">{userData.bio || "No bio available"}</p>
+
+            {/* Hacker profile info */}
+            {recommended.length > 0 && (
+              <>
+                <div className="flex flex-wrap gap-2 mb-3 justify-center">
+                  {recommended[0].tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-xs mb-3">{recommended[0].about || recommended[0].bio}</p>
+              </>
+            )}
+
+            <Button
+              className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold w-full"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </Card>
         </div>
       )}
 

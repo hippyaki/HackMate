@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
 // GET single user by uuid
 const getUserByUid = async (req, res) => {
   try {
-    const { uuid } = req.body;
+    const { uuid } = req.query;
     const userSnap = await db.collection("users").doc(uuid).get();
 
     if (!userSnap.exists) {
@@ -57,7 +57,7 @@ const addUser = async (req, res) => {
 // GET check if username exists
 const checkUID = async (req, res) => {
   try {
-    const { uuid } = req.body;
+    const { uuid } = req.query;
 
     const snapshot = await db.collection("users").where("uuid", "==", uuid).get();
 

@@ -89,7 +89,7 @@ export default function SwipeRecords() {
           const json = await res.json();
           if (json.status === 200 && json.data) {
             //setUserData(json.data); // Update userdata with username of commudle, and trigger hacker profile update
-            const userTags = json.data[0].tags.map(tag => tag.name.toLowerCase());
+            const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
             matchProfiles(userTags); // Start Swiping
             setShowPopup(false);
           } else {

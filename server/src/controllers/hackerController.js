@@ -169,11 +169,6 @@ const getHackerMatches = async (req, res) => {
       return { ...hacker, matchScore: commonTags.length };
     });
 
-    // Sort by match score descending and pick top 50
-    const top50 = hackersWithScore
-      .sort((a, b) => b.matchScore - a.matchScore)
-      .slice(0, 50);
-
     // Fetch user doc by username
     const userSnap = await db.collection("hackers").where("username", "==", username).limit(1).get();
 
@@ -186,9 +181,14 @@ const getHackerMatches = async (req, res) => {
     const subscribedTo = userData.subscribedTo || [];
 
     // Filter out hackers that the user is already subscribed to
-    const filteredMatches = top50.filter(hacker => !subscribedTo.includes(hacker.username));
+    const filteredMatches = hackersWithScore.filter(hacker => !subscribedTo.includes(hacker.username));
 
-    res.status(200).json(filteredMatches);
+    // Sort by match score descending and pick top 50
+    const top50 = filteredMatches
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 50);
+
+    res.status(200).json(top50);
   } catch (error) {
     console.error("Error fetching hacker matches:", error);
     res.status(500).json({ message: "Failed to fetch hacker matches" });

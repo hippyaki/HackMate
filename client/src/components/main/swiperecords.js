@@ -363,78 +363,97 @@ export default function SwipeRecords() {
       
       {tab === "main" && (
         <div className="flex-1 flex flex-col justify-center items-center p-4 z-10 relative">
-          {/* Popup */}
+
+          {/* Popup for Commudle Username */}
           {showPopup && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-            <Card className="p-6 w-80 backdrop-blur-lg bg-white/2 rounded-2xl border border-[#333]">
-              <h2 className="text-lg font-semibold mb-3 text-center text-gray-100">
-                Enter Commudle Username
-              </h2>
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+              <Card className="p-6 w-80 backdrop-blur-lg bg-white/5 rounded-2xl border border-[#333]">
+                <h2 className="text-lg font-semibold mb-3 text-center text-gray-100">
+                  Enter Commudle Username
+                </h2>
 
-              <input
-                type="text"
-                value={uname}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. gdg-noida"
-                className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
-              />
+                <input
+                  type="text"
+                  value={uname}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="e.g. gdg-noida"
+                  className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
+                />
 
-              {/* Error message */}
-              {commudle_error && (
-                <p className="text-red-400 text-sm mb-2 text-center">{commudle_error}</p>
-              )}
+                {commudle_error && (
+                  <p className="text-red-400 text-sm mb-2 text-center">{commudle_error}</p>
+                )}
 
-              <Button
-                className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold"
-                onClick={() => fetchProfile(uname)}
-              >
-                Continue
-              </Button>
-            </Card>
-          </div>
-        )}
-            {!showPopup && recommended.length === 0  ? (
-                <p className="text-xl font-semibold">You must be Unique 😅</p>
-              ) :  (
-              
-              <motion.div
-                key={recommended[0].name}
-                className="relative w-80 rounded-3xl shadow-xl p-4 backdrop-blur-lg bg-white/2 border border-white/20"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-              >
-              
-                <h2 className="text-xl font-semibold">{recommended[0].name}</h2>
-                <p className="text-gray-300 text-sm mb-3">{recommended[0].about_me}</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {recommended[0].tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
-                    >
-                      #{tag.name}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex justify-around mt-3">
-                  <Button
-                    variant="outline"
-                    className="border-[#333] text-gray-400 hover:bg-[#1F1F1F]"
-                    onClick={() => setRecommended((prev) => prev.slice(1))}
-                  >
-                    ❌ Pass
-                  </Button>
-                  <Button
-                    className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold"
-                    onClick={() => handleSwipe(recommended[0])}
-                  >
-                    💖 Like
-                  </Button>
-                </div>
-              </motion.div>
+                <Button
+                  className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold"
+                  onClick={() => fetchProfile(uname)}
+                >
+                  Continue
+                </Button>
+              </Card>
+            </div>
           )}
-          </div>
+
+          {/* Main Content */}
+          {!showPopup && (
+            <>
+              {recommended.length === 0 ? (
+                <p className="text-xl font-semibold text-gray-300">
+                  You must be unique 😅
+                </p>
+              ) : (
+                <motion.div
+                  key={recommended[0].id || recommended[0].name}
+                  className="relative w-80 rounded-3xl shadow-xl p-4 backdrop-blur-lg bg-white/5 border border-white/20"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                >
+                  <h2 className="text-xl font-semibold text-gray-100 mb-1">
+                    {recommended[0].name}
+                  </h2>
+                  {recommended[0].about_me && (
+                    <p className="text-gray-300 text-sm mb-3">
+                      {recommended[0].about_me}
+                    </p>
+                  )}
+
+                  {/* Tags */}
+                  {recommended[0].tags && recommended[0].tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {recommended[0].tags.map((tag) => (
+                        <span
+                          key={tag.id || tag.name}
+                          className="bg-[#FF8C00]/20 text-[#FFA733] text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+                        >
+                          #{tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex justify-around mt-3">
+                    <Button
+                      variant="outline"
+                      className="border-[#333] text-gray-400 hover:bg-[#1F1F1F]"
+                      onClick={() => setRecommended((prev) => prev.slice(1))}
+                    >
+                      ❌ Pass
+                    </Button>
+                    <Button
+                      className="bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold"
+                      onClick={() => handleSwipe(recommended[0])}
+                    >
+                      💖 Like
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </>
+          )}
+        </div>
       )}
+
 
       {/* Matches Tab */}
       {tab === "matches" && (

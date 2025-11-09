@@ -5,8 +5,7 @@ import LoginPage from "./components/authentication/LoginPage";
 import SwipeRecords from "./components/main/swiperecords";
 
 const ProtectedRoute = ({ user, children }) => {
-  if (!user) return <Navigate to="/" replace />;
-  return children;
+  return user ? children : <Navigate to="/" replace />;
 };
 
 const App = () => {
@@ -27,6 +26,13 @@ const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Default Route */}
+        <Route
+          path="/"
+          element={user ? <Navigate to="/swipe" replace /> : <LoginPage />}
+        />
+
+        {/* Protected Swipe Route */}
         <Route
           path="/swipe"
           element={
@@ -35,8 +41,9 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={user ? <SwipeRecords /> : <LoginPage />} />
-        <Route path="/swipe" element={user ? <SwipeRecords /> : <LoginPage />} />
+
+        {/* Catch-all: Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

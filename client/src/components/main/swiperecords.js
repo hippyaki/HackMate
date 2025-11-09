@@ -35,6 +35,7 @@ export default function SwipeRecords() {
     };
 
     checkUser();
+    checkUsername();
   }, []);
 
 
@@ -104,7 +105,7 @@ export default function SwipeRecords() {
       console.error(e);
     }
   };
-  checkUsername();
+  
 
 
 

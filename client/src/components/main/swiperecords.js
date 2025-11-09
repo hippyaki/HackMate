@@ -49,7 +49,7 @@ export default function SwipeRecords() {
                   const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
-                  setUserData(username);
+                  setUserData(username, currentUser);
                 } else {
                   console.log("User not found. Try again!");
                   setShowPopup(true);
@@ -107,9 +107,11 @@ export default function SwipeRecords() {
   //   fetchCommudleData();
   // }, [userData?.username]);
 
-  const setUserData = async (username) => {
+  const setUserData = async (username, currentUser) => {
     try {
-      if (!userData?.uid) {
+      console.log("CurrentUser:", currentUser);
+      console.log("userData:", userData);
+      if (!currentUser?.uid) {
         console.error("User UID not available");
         return;
       }
@@ -124,7 +126,7 @@ export default function SwipeRecords() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          uuid: userData.uid,
+          uuid: currentUser.uid,
           username: trimmed,
         }),
       });
@@ -156,9 +158,9 @@ export default function SwipeRecords() {
       }
 
       const payload = {
-        uid: String(userData.uid || ""), // ensure string
+        uid: String(currentUser.uid || ""), // ensure string
         username: trimmed,
-        name: (commudleData?.name || userData?.displayName || "").trim(),
+        name: (commudleData?.name || currentUser?.displayName || "").trim(),
         bio: (commudleData?.bio || commudleData?.about_me || "") || "",
         tags: Array.isArray(commudleData?.tags)
           ? commudleData.tags.map((t) => (typeof t === "string" ? t : t.name || "")).filter(Boolean)
@@ -168,7 +170,7 @@ export default function SwipeRecords() {
         subscribedTo: commudleData?.subscribedTo || [],
         postsTokenId: commudleData?.postsTokenId || "",
         visibility: commudleData?.visibility || "public",
-        photoURL: (commudleData?.photo?.url) || userData?.photoURL || "",
+        photoURL: (commudleData?.photo?.url) || currentUser?.photoURL || "",
       };
 
       try {

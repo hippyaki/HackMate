@@ -11,10 +11,11 @@ const {
 const router = express.Router();
 
 router.get("/all", getAllHackers);
-router.get("/:uid", getHackerById);
+router.get("/match", getHackerMatches); // specific route first
+router.get("/:uid", getHackerById);     // general route last
 router.post("/", createHacker);
 router.put("/:uid", updateHacker);
 router.delete("/:uid", deleteHacker);
-router.get("/match", getHackerMatches);
+
 
 module.exports = router;

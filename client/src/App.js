@@ -36,6 +36,7 @@ const App = () => {
           }
         />
         <Route path="/" element={user ? <Navigate to="/swipe" /> : <LoginPage />} />
+        <Route path="/swipe" element={user ? <Navigate to="/swipe" /> : <LoginPage />} />
       </Routes>
     </Router>
   );

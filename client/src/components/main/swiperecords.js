@@ -16,9 +16,6 @@ export default function SwipeRecords() {
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");
   const rocketContainerRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,24 +29,24 @@ export default function SwipeRecords() {
             const res = await fetch(`https://hackmate-rv8q.onrender.com/api/users?uuid=${currentUser.uid}`);
             const json = await res.json();
 
+            // Check if User has Commudle linked
             if (res.status === 200) {
               const username = json.username;
-              const subs = json.subscribedTo;
-
+              
               if (!username || username.trim() === "") {
                 setShowPopup(true); // Show popup to enter Commudle username
               } else {
-                const res = await fetch(`https://json.commudle.com/api/v2/users?username=${username}`);
-                const json = await res.json();
+                let res = await fetch(`https://hackmate-rv8q.onrender.com/api/hackers?username=${username}`);
+                let json = await res.json();
                 if (json.status === 200 && json.data) {
                   setUserInfo({
                     username: username,
                     bio: json.data.about_me || "No bio available",
                     tags: json.data.tags?.map((tag) => tag.name) || [],
-                    subscribedTo: subs
+                    subscribedTo: json.data.subscribedTo || []
                   });
                   const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
-                  setPreMatches(subs); // Fetch subscribed profiles
+                  setPreMatches(json.data.subscribedTo); // Fetch subscribed profiles
                   matchProfiles(userTags); // Start Swiping
                   setShowPopup(false);
                   setUserData(username, currentUser);
@@ -59,10 +56,12 @@ export default function SwipeRecords() {
                 }
               }
             } else {
+              // Commudle not linked - get username
               console.log("User not found. Try again!");
               setShowPopup(true);
             }
           } catch (e) {
+            // User not found - get username
             console.log("Something went wrong");
             console.error(e);
             setShowPopup(true);
@@ -82,7 +81,6 @@ export default function SwipeRecords() {
   const setUserData = async (username, currentUser) => {
     try {
       console.log("CurrentUser:", currentUser);
-      console.log("userData:", userData);
       if (!currentUser?.uid) {
         console.error("User UID not available");
         return;

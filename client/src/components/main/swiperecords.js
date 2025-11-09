@@ -10,8 +10,8 @@ import { useNavigate } from 'react-router-dom';
 export default function SwipeRecords() {
   const [userInfo, setUserInfo] = useState({ bio: "", tags: [] });
   const [uname, setUsername] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
   const [userData, setUser] = useState(null);
+  const [showPopup, setShowPopup] = useState(true);
   const [matches, setMatches] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [tab, setTab] = useState("main");

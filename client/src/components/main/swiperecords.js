@@ -86,7 +86,7 @@ export default function SwipeRecords() {
 
         if (res.ok && json.status === 200 && json.data) {
           setUserInfo({
-            bio: json.data.bio || "No bio available",
+            bio: json.data.about_me || "No bio available",
             tags: json.data.tags?.map((tag) => tag.name) || [],
           });
         } else {
@@ -291,7 +291,7 @@ export default function SwipeRecords() {
               >
               
                 <h2 className="text-xl font-semibold">{recommended[0].name}</h2>
-                <p className="text-gray-300 text-sm mb-3">{recommended[0].bio}</p>
+                <p className="text-gray-300 text-sm mb-3">{recommended[0].about_me}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recommended[0].tags.map((tag) => (
                     <span
@@ -376,7 +376,7 @@ export default function SwipeRecords() {
             <h2 className="text-xl font-semibold text-gray-100 mb-1">
               {userData.displayName || "Anonymous"}
             </h2>
-            <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p>
+            {/* <p className="text-gray-300 text-sm mb-2">{userInfo.bio || "No bio available"}</p> */}
 
             {/* Hacker profile info */}
             <div>

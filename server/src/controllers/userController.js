@@ -102,7 +102,7 @@ const updateUser = async (req, res) => {
     };
 
     // Update the user document
-    await db.collection("users").doc(uuid).update(updates);
+    await db.collection("users").where("uuid", "==", uuid).update(updates);
 
     res.status(200).json({ message: "Username updated successfully" });
   } catch (error) {

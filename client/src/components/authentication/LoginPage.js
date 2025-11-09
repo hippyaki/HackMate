@@ -130,7 +130,7 @@ const LoginPage = ({ switchToSignUp }) => {
             className="h-40 w-auto object-contain"
           />
         </div>
-        <div className=" text-8xl text-center">
+        <div className=" text-6xl text-center">
           <h1 style={{ fontFamily: 'HackMateFont' }}>HackMate</h1>
         </div>
 

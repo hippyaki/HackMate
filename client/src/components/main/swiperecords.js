@@ -51,7 +51,7 @@ export default function SwipeRecords() {
                   });
                   const userTags = json2.tags.map(tag => tag.toLowerCase());
                   setPreMatches(json2.subscribedTo); // Fetch subscribed profiles
-                  matchProfiles(userTags); // Start Swiping
+                  matchProfiles(username, userTags); // Start Swiping
                   setShowPopup(false);
                 } 
                 else {
@@ -230,7 +230,7 @@ export default function SwipeRecords() {
         // });
         setUserData(uname);
         const userTags = json.data.tags.map(tag => tag.name.toLowerCase());
-        matchProfiles(userTags); // Start Swiping
+        matchProfiles(uname, userTags); // Start Swiping
         setShowPopup(false);
         
       } else {
@@ -242,14 +242,14 @@ export default function SwipeRecords() {
       setShowPopup(false);
     }
   };
-  const matchProfiles = async (userTags) => {
+  const matchProfiles = async (uname, userTags) => {
     try {
       const res = await fetch("https://hackmate-rv8q.onrender.com/api/hackers/match", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ tags: userTags }), // send tags in body
+        body: JSON.stringify({ tags: userTags, username: uname }), // send tags in body
       });
 
       if (!res.ok) {

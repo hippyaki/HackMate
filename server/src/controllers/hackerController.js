@@ -146,36 +146,55 @@ const deleteHacker = async (req, res) => {
 };
 
 // POST /hackers/match
-// Request body: { tags: ["web development", "dsa problem solving"] }
+// Request body: { username: "gdg-noida", tags: ["web development", "dsa problem solving"] }
 const getHackerMatches = async (req, res) => {
   try {
-    const inputTags = req.body.tags;
+    const { tags: inputTags, username } = req.body;
+
     if (!Array.isArray(inputTags) || inputTags.length === 0) {
       return res.status(400).json({ message: "tags array is required in request body" });
     }
+    if (!username) {
+      return res.status(400).json({ message: "username is required in request body" });
+    }
 
+    // Fetch all hackers (we’ll filter to 50 after scoring)
     const snapshot = await db.collection("hackers").get();
     const hackers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Compute matching score based on common tags
+    // Compute match scores
     const hackersWithScore = hackers.map(hacker => {
       const hackerTags = (hacker.tags || []).map(t => t.name);
       const commonTags = hackerTags.filter(tag => inputTags.includes(tag));
-      return {
-        ...hacker,
-        matchScore: commonTags.length
-      };
+      return { ...hacker, matchScore: commonTags.length };
     });
 
-    // Sort by matchScore descending
-    hackersWithScore.sort((a, b) => b.matchScore - a.matchScore);
+    // Sort by match score descending and pick top 50
+    const top50 = hackersWithScore
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 50);
 
-    res.status(200).json(hackersWithScore);
+    // Fetch user doc by username
+    const userSnap = await db.collection("hackers").where("username", "==", username).limit(1).get();
+
+    if (userSnap.empty) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userDoc = userSnap.docs[0];
+    const userData = userDoc.data();
+    const subscribedTo = userData.subscribedTo || [];
+
+    // Filter out hackers that the user is already subscribed to
+    const filteredMatches = top50.filter(hacker => !subscribedTo.includes(hacker.username));
+
+    res.status(200).json(filteredMatches);
   } catch (error) {
     console.error("Error fetching hacker matches:", error);
     res.status(500).json({ message: "Failed to fetch hacker matches" });
   }
 };
+
 
 
 // POST /hackers/subs

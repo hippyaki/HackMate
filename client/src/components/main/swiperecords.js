@@ -19,6 +19,7 @@ export default function SwipeRecords() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [commudle_error, setErrorCommudle] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -221,7 +222,7 @@ export default function SwipeRecords() {
     try {
       const res = await fetch(`https://json.commudle.com/api/v2/users?username=${uname}`);
       const json = await res.json();
-      if (json.status === 200 && json.data) {
+      if (res.status === 200) {
         // setUserInfo({
         //   username: uname,
         //   bio: json.data.about_me || "No bio available",
@@ -234,9 +235,10 @@ export default function SwipeRecords() {
         
       } else {
         console.log("User not found. Try again!");
+        setErrorCommudle("Username not found");
       }
     } catch (e) {
-      console.log("Error fetching Matches");
+      console.log("Error fetching Commudle profile:", e);
       setShowPopup(false);
     }
   };
@@ -363,27 +365,34 @@ export default function SwipeRecords() {
         <div className="flex-1 flex flex-col justify-center items-center p-4 z-10 relative">
           {/* Popup */}
           {showPopup && (
-            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-              <Card className="p-6 w-80 backdrop-blur-lg bg-white/2 rounded-2xl border border-[#333]">
-                <h2 className="text-lg font-semibold mb-3 text-center text-gray-100">
-                  Enter Commudle Username
-                </h2>
-                <input
-                  type="text"
-                  value={uname}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="e.g. gdg-noida"
-                  className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
-                />
-                <Button 
-                  className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold" 
-                  onClick={() => fetchProfile(uname)}
-                >
-                  Continue
-                </Button>
-              </Card>
-            </div>
-          )}
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+            <Card className="p-6 w-80 backdrop-blur-lg bg-white/2 rounded-2xl border border-[#333]">
+              <h2 className="text-lg font-semibold mb-3 text-center text-gray-100">
+                Enter Commudle Username
+              </h2>
+
+              <input
+                type="text"
+                value={uname}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. gdg-noida"
+                className="w-full bg-[#1E1E1E] border border-[#333] text-gray-100 placeholder-gray-500 p-2 rounded-lg mb-3 focus:outline-none focus:border-[#FF8C00]"
+              />
+
+              {/* Error message */}
+              {commudle_error && (
+                <p className="text-red-400 text-sm mb-2 text-center">{commudle_error}</p>
+              )}
+
+              <Button
+                className="w-full bg-[#FF8C00] hover:bg-[#FFA733] text-black font-semibold"
+                onClick={() => fetchProfile(uname)}
+              >
+                Continue
+              </Button>
+            </Card>
+          </div>
+        )}
             {!showPopup && recommended.length === 0  ? (
                 <p className="text-xl font-semibold">You must be Unique 😅</p>
               ) :  (

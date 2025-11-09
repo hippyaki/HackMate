@@ -43,7 +43,7 @@ const App = () => {
         />
 
         {/* Catch-all: Redirect unknown routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
       </Routes>
     </Router>
   );
